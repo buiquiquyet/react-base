@@ -3,9 +3,7 @@
 function App() {
 
   return (
-    <div>
-
-    </div>
+   <div>Bùi Qúi Quyết</div>
   )
 }
 
