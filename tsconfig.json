@@ -1,10 +1,20 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "baseUrl": "src",
+
+    "paths": {
+      "@app/*": ["app/*"],
+      "@config/*": ["app/_config/*"],
+      "@environment/*": ["environments/*"],
+      "@shared/*": ["app/_shared/*"],
+      "@helpers/*": ["helpers/*"]
+  },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -12,7 +22,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    // "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
@@ -20,6 +30,35 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
+// {
+//   "compilerOptions": {
+//     "jsx": "react-jsx",
+//     "target": "ES2020",
+//     "useDefineForClassFields": true,
+//     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+//     "module": "ESNext",
+//     "skipLibCheck": true,
+//     "baseUrl": "src",
+//     "paths": {
+//       "@app/*": ["app/*"],
+//       "@config/*": ["app/_config/*"],
+//       "@environment/*": ["environments/*"],
+//       "@shared/*": ["app/_shared/*"],
+//       "@helpers/*": ["helpers/*"]
+//     },
+//     "moduleResolution": "node",
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "noEmit": true,
+//     "strict": true,
+//     "noUnusedLocals": true,
+//     "noUnusedParameters": true,
+//     "noFallthroughCasesInSwitch": true
+//   },
+//   // "include": ["src/**/*.ts", "src/app/admin/test.tsx", "src/App.tsx", "src/App.tsx"],
+//   "include": ["src/**/*.ts", "src/**/*.tsx"],
+//   "references": [{ "path": "./tsconfig.node.json" }]
+// }
