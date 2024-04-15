@@ -1,0 +1,39 @@
+.tooltip-error-wapper{
+    display: none;
+    bottom: 46px;
+    background: #E3EFFD;
+    padding: 8px 12px;
+    border-radius: 8px;
+    // box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    font-size: 12px;
+    font-family: 'Be vietnam pro', sans-serif;
+    max-width: 472px;
+    &::after{
+    content: "";
+        position: absolute;
+        bottom: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #E3EFFD;
+    }
+    .tooltip-error{
+        
+        display: flex;
+        align-items: center;
+        /* justify-content: center; */
+          .tooltip-error__icon{
+            margin-right: 8px;
+            margin-bottom: 2px;
+          }
+        &:not(:last-child){
+            margin-bottom: 8px;
+        }
+        .tooltip-error__content {
+            p {
+                margin: 0
+            }
+        }
+    }
+    
+}

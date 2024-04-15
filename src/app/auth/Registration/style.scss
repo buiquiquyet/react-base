@@ -1,0 +1,23 @@
+.auth-resgitration {
+    input {
+        font-size: 18px;
+        &:hover {
+            border: 1px solid var(--primary);
+        }
+    }
+    .is-invalid {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #f56565;
+      }
+    .mess-invalid {
+        color: #f56565 ;
+        margin-left: 4px;
+    }
+    .small-eye {
+        position: absolute;
+        top: 22px;
+        right: 36px;
+        padding: 16px 6px 16px 12px;
+    }
+}
