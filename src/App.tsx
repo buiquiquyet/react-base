@@ -1,9 +1,10 @@
 
-
 function App() {
 
   return (
-   <div>Bùi Qúi Quyết</div>
+   <div>
+    <img src={import.meta.env.VITE_PUBLIC_URL + "icons/logo.png"}/>
+   </div>
   )
 }
 
