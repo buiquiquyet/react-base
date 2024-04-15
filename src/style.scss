@@ -1,0 +1,63 @@
+
+
+// mobile
+@media (max-width: 767px) {
+  :root {
+    --vh: 1vh;
+  }
+}
+
+// other devices
+@media (min-width: 768px) {
+  :root {
+    --vh: 1vh;
+  }
+}
+
+:root {
+  --primary: #007bff;
+  --primary-second: #38a4ff;
+  --background-1: #e3effd;
+  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono", "Courier New", monospace
+}
+.pointer-event-none {
+  pointer-events: none;
+}
+.item-hover{
+  &:hover{
+    background-color: #d9d9dd !important;
+  }
+}
+
+body {
+  font-family: sans-serif, serif !important;
+  scroll-behavior: smooth;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+.skill-suggestion{
+  cursor: pointer;
+}
+// button, input, [tabIndex] {
+//     font-size: 18px;
+// }
+svg {
+  color: var(--primary)  !important;
+}
+a[href] {
+    color: var(--text-color);
+    text-decoration: none;
+}
+svg {
+    color: var(--primary);
+}
