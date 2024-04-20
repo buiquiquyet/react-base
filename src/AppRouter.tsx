@@ -13,7 +13,7 @@ function AppRouter() {
               <Navigate to={"/auth/login"} />
           }
         />
-        <Route path="*" element={<Login />} />
+        {/* <Route path="*" element={<Login />} /> */}
       </Routes>
   );
 }

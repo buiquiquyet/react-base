@@ -4,7 +4,9 @@ import * as Yup from "yup";
 import SVG from "react-inlinesvg";
 import "./style.scss";
 import { Link } from "react-router-dom";
+import { checkUserName, register } from "@/redux/auth/authCrud";
 const initialValues = {
+  name: "",
   email: "",
   password: "",
   rePassword: "",
@@ -13,6 +15,7 @@ const initialValues = {
 function Resgistration() {
   const [isActiveEye, setIsActiveEye] = useState<boolean>(false);
   const [isActiveEyeAgain, setIsActiveEyeAgain] = useState<boolean>(false);
+  const [userNameCheck, setUserNameCheck] = useState('');
   const toogleActiveEye = (idInput: string, idRef: string) => {
     idInput === "isActiveEye"
       ? setIsActiveEye(!isActiveEye)
@@ -26,12 +29,21 @@ function Resgistration() {
     passElement.setAttribute("type", typePass);
   };
   const RegistrationSchema = Yup.object().shape({
+    name: Yup.string()
+    .notOneOf(
+      [userNameCheck],
+      "Tên đăng nhập đã được sử dụng. Vui lòng đổi tên khác"
+    )
+    .required("Vui lòng nhập tên đăng nhập của bạn")
+    .min(3, "Tên đăng nhập tối thiểu 3 ký tự")
+    .max(50, "Tên đăng nhập tối đa 50 ký tự")
+    .matches(/^\S+$/, "Vui lòng không nhập khoảng trắng"),
     email: Yup.string()
       .notOneOf(
         ["Tên đăng nhập đã được sử dụng"],
         "Tên đăng nhập đã được sử dụng. Vui lòng đổi tên khác"
       )
-      .required("Vui lòng nhập email của bạn")
+      .required("Vui lòng nhập tên đăng nhập của bạn")
       .email("Email chưa nhập đúng định dạng")
       .min(6, "Email tối thiểu 6 ký tự")
       .max(50, "Email tối đa 50 ký tự")
@@ -57,7 +69,7 @@ function Resgistration() {
     initialValues,
     validationSchema: RegistrationSchema,
     onSubmit: (values) => {
-      console.log(values);
+      // register()
     },
   });
   const handleBlur = (fieldName: string) => {
@@ -66,6 +78,19 @@ function Resgistration() {
   const handleFocus = (fieldName: string) => {
     formik.setFieldTouched(fieldName, false);
   };
+  const handleCheckUserName = (userName: string) => {
+    if (userName) {
+      checkUserName(userName).then((res: any) => {
+        setUserNameCheck(res.data?.userName);
+        if (userName === res.data?.userName) {
+          formik.setFieldError(
+            'name',
+            'Tên đăng nhập đã tồn tại. Vui lòng đổi tên khác',
+          );
+        }
+      });
+    }
+  }
   return (
     <section className="vh-100 auth-resgitration">
       <div className="container-fluid h-custom">
@@ -95,6 +120,29 @@ function Resgistration() {
             <form onSubmit={formik.handleSubmit}>
               <div className="d-flex flex-column gap-3 align-items-center justify-content-center justify-content-lg-start">
                 <div className="lead fw-bold mb-4 ">Đăng ký tài khoản</div>
+              </div>
+              <div data-mdb-input-init className="form-outline mb-3">
+                <input
+                  className={`form-control form-control-lg smaill-eye ${
+                    formik.errors.name && formik.touched.name
+                      ? "is-invalid"
+                      : ""
+                  }`}
+                  maxLength={50}
+                  type="name"
+                  name="name"
+                  value={formik.values.name}
+                  onChange={formik.handleChange}
+                  onBlur={() => {
+                    handleBlur("name")
+                    handleCheckUserName(formik.values.name)
+                  }}
+                  onFocus={() => handleFocus("name")}
+                  placeholder="Tên đăng nhập"
+                />
+                {formik.errors.name && formik.touched.name ? (
+                  <div className="mess-invalid mt-1">{formik.errors.name}</div>
+                ) : null}
               </div>
               <div data-mdb-input-init className="form-outline mb-3">
                 <input

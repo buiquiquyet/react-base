@@ -4,8 +4,11 @@ import "./styles/login.scss";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import Spinner from "@/helper/Spinner.tsx";
+import Spinner from "@/helper/Spinner";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { login } from "@/redux/auth/authCrud";
 const initialValues = {
   email: "",
   password: "",
@@ -13,6 +16,8 @@ const initialValues = {
 function Login() {
   const [isActiveEye, setIsActiveEye] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [disable, setDisable] = useState(false);
   const handleToogleActiveEye = () => {
     setIsActiveEye(!isActiveEye);
     const passElement = document.querySelector("#passInput") as HTMLDivElement;
@@ -23,17 +28,31 @@ function Login() {
 
   const formik = useFormik({
     initialValues,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values) => {
+      setErrorMessage("");
+      setDisable(true);
+      login(values.email, values.password)
+        .then((res: any) => {
+          if (res.data.errorMessage) {
+            setErrorMessage(res.data.errorMessage);
+            setDisable(false);
+          } else {
+            toast.success("Đăng nhập thành công.", {
+              autoClose: 1800,
+              onClose: () => {
+                window.location.href = "/auth/registration";
+              },
+            });
+          }
+        })
+        .catch(() => {
+          setDisable(false);
+        });
     },
     validate: (values) => {
       const errors: any = {};
-      console.log(values);
-
       if (!values.email) {
         errors.email = "Vui lòng nhập email của bạn";
-      } else if (!Yup.string().email().isValidSync(values.email)) {
-        errors.email = "Email chưa nhập đúng định dạng";
       } else if (!Yup.string().min(3).max(50).isValidSync(values.email)) {
         errors.email = "Tên đăng nhập không hợp lệ";
       }
@@ -64,13 +83,13 @@ function Login() {
     }, 1800);
     return () => clearTimeout(timeSpinner);
   }, []);
-  
   return (
     <>
       {loading ? (
         <Spinner />
       ) : (
         <section className="vh-100 auth-login">
+          <ToastContainer />
           <div className="container-fluid h-custom">
             <div
               className="row d-flex justify-content-center align-items-center h-100"
@@ -144,9 +163,9 @@ function Login() {
 
                   <div data-mdb-input-init className="form-outline mb-3">
                     <input
-                      type="email"
+                      type="text"
                       name="email"
-                      className={`form-control form-control-lg smaill-eye ${
+                      className={`form-control form-control-lg input-form ${
                         formik.errors.email && formik.touched.email
                           ? "is-invalid"
                           : ""
@@ -154,7 +173,7 @@ function Login() {
                       value={formik.values.email}
                       onChange={formik.handleChange}
                       style={{ fontSize: "18px" }}
-                      placeholder="Nhập địa chỉ email"
+                      placeholder="Nhập email/Tên đăng nhập"
                       onBlur={() => handleBlur("email")}
                       onFocus={() => handleFocus("email")}
                     />
@@ -174,7 +193,7 @@ function Login() {
                       type="password"
                       id="passInput"
                       name="password"
-                      className={`form-control form-control-lg smaill-eye ${
+                      className={`form-control form-control-lg input-form ${
                         formik.errors.password && formik.touched.password
                           ? "is-invalid"
                           : ""
@@ -207,9 +226,10 @@ function Login() {
                         />
                       )}
                     </div>
-                    {formik.errors.password && formik.touched.password ? (
+                    {(formik.errors.password && formik.touched.password) ||
+                    errorMessage !== "" ? (
                       <div className="mess-invalid mt-1">
-                        {formik.errors.password}
+                        {formik.errors.password || errorMessage}
                       </div>
                     ) : null}
                   </div>
@@ -229,14 +249,17 @@ function Login() {
                         Ghi nhớ mật khẩu
                       </label>
                     </div>
-                    <Link to={'/auth/forgot-password'} className="text-body forget-pass">
+                    <Link
+                      to={"/auth/forgot-password"}
+                      className="text-body forget-pass"
+                    >
                       Quên mật khẩu?
                     </Link>
                   </div>
 
                   <div className="text-center text-lg-start mt-4 pt-2">
                     <button
-                      type="button"
+                      type="submit"
                       data-mdb-button-init
                       data-mdb-ripple-init
                       className="btn btn-primary btn-lg"
@@ -244,6 +267,7 @@ function Login() {
                         paddingLeft: " 2.5rem",
                         paddingRight: "2.5rem",
                       }}
+                      disabled={disable}
                     >
                       Đăng nhập
                     </button>
