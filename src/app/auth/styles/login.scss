@@ -28,7 +28,7 @@
     right: 36px;
     padding: 16px 6px 16px 12px;
   }
-  
+
   .is-invalid {
     width: 100%;
     border-radius: 10px;
@@ -43,10 +43,9 @@
     margin: 0 auto;
     border-color: red;
   }
-
-  @media (max-width: 450px) {
-    .h-custom {
-      height: 100%;
-    }
+}
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
   }
 }

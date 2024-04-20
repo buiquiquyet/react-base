@@ -1,4 +1,4 @@
 window['runtimeConfig'] = {
-    API_URL : '',
+    API_URL : 'https://localhost:7112',
    
   };
