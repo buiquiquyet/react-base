@@ -8,6 +8,9 @@ export function login(tendangnhap: string, matkhau: string) {
     matkhau,
   });
 }
+export function getAllUsers() {
+  return axios.get(`${AUTH_URL}/User`);
+}
 // export function register(data: { name: any; email: string; password: string }) {
 //   return axios.post(`${AUTH_URL}/register`, data);
 // }

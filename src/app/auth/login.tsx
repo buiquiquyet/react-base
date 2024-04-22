@@ -46,6 +46,9 @@ function Login() {
           }
         })
         .catch(() => {
+          toast.error("Đăng nhập không thành công.", {
+            autoClose: 1800,
+          });
           setDisable(false);
         });
     },

@@ -1,4 +1,4 @@
-import BaseTableAdmin from "./Base-table-admin";
+import BaseTableAdmin from "../../layout/component/Base-table-admin";
 const rowsPerPageOptions= [5, 10, 20, 50]
 
 function IntructorProfile() {
