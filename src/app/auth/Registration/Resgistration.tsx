@@ -4,7 +4,6 @@ import * as Yup from "yup";
 import SVG from "react-inlinesvg";
 import "./style.scss";
 import { Link } from "react-router-dom";
-import { checkUserName, register } from "@/redux/auth/authCrud";
 const initialValues = {
   name: "",
   email: "",
@@ -80,14 +79,15 @@ function Resgistration() {
   };
   const handleCheckUserName = (userName: string) => {
     if (userName) {
-      checkUserName(userName).then((res: any) => {
+      checkUserName(userName)
+        .then((res: any) => {
         setUserNameCheck(res.data?.userName);
-        if (userName === res.data?.userName) {
-          formik.setFieldError(
-            'name',
-            'Tên đăng nhập đã tồn tại. Vui lòng đổi tên khác',
-          );
-        }
+        // if (userName === res.data?.userName) {
+        //   formik.setFieldError(
+        //     'name',
+        //     'Tên đăng nhập đã tồn tại. Vui lòng đổi tên khác',
+        //   );
+        // }
       });
     }
   }

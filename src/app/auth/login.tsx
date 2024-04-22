@@ -10,7 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/auth/authCrud";
 const initialValues = {
-  email: "",
+  tendangnhap: "",
   password: "",
 };
 function Login() {
@@ -31,7 +31,7 @@ function Login() {
     onSubmit: async (values) => {
       setErrorMessage("");
       setDisable(true);
-      login(values.email, values.password)
+      login(values.tendangnhap, values.password)
         .then((res: any) => {
           if (res.data.errorMessage) {
             setErrorMessage(res.data.errorMessage);
@@ -40,7 +40,7 @@ function Login() {
             toast.success("Đăng nhập thành công.", {
               autoClose: 1800,
               onClose: () => {
-                window.location.href = "/auth/registration";
+                window.location.href = "/admin";
               },
             });
           }
@@ -51,15 +51,21 @@ function Login() {
     },
     validate: (values) => {
       const errors: any = {};
-      if (!values.email) {
-        errors.email = "Vui lòng nhập email của bạn";
-      } else if (!Yup.string().min(3).max(50).isValidSync(values.email)) {
-        errors.email = "Tên đăng nhập không hợp lệ";
+      if (!values.tendangnhap) {
+        errors.tendangnhap = "Vui lòng nhập tên đăng nhập của bạn";
+      } else if (!Yup.string().min(3).max(50).isValidSync(values.tendangnhap)) {
+        errors.tendangnhap = "Tên đăng nhập không hợp lệ";
+      } else if (
+        !Yup.string()
+          .matches(/^[a-zA-Z0-9_]+$/i)
+          .isValidSync(values.tendangnhap)
+      ) {
+        errors.tendangnhap = "Vui lòng không nhập ký tự đặc biệt và khoảng trắng";
       }
       if (!values.password) {
         errors.password = "Mật khẩu không được bỏ trống";
-      } else if (!Yup.string().min(6).max(20).isValidSync(values.password)) {
-        errors.password = "Chứa từ 6 -20 ký tự";
+      } else if (!Yup.string().min(3).max(20).isValidSync(values.password)) {
+        errors.password = "Chứa từ 3 -20 ký tự";
       } else if (
         !Yup.string()
           .matches(/^[a-zA-Z0-9_]+$/i)
@@ -80,7 +86,7 @@ function Login() {
   useEffect(() => {
     const timeSpinner = setTimeout(() => {
       setLoading(false);
-    }, 1800);
+    }, 1500);
     return () => clearTimeout(timeSpinner);
   }, []);
   return (
@@ -164,22 +170,22 @@ function Login() {
                   <div data-mdb-input-init className="form-outline mb-3">
                     <input
                       type="text"
-                      name="email"
+                      name="tendangnhap"
                       className={`form-control form-control-lg input-form ${
-                        formik.errors.email && formik.touched.email
+                        formik.errors.tendangnhap && formik.touched.tendangnhap
                           ? "is-invalid"
                           : ""
                       }`}
-                      value={formik.values.email}
+                      value={formik.values.tendangnhap}
                       onChange={formik.handleChange}
                       style={{ fontSize: "18px" }}
-                      placeholder="Nhập email/Tên đăng nhập"
-                      onBlur={() => handleBlur("email")}
-                      onFocus={() => handleFocus("email")}
+                      placeholder="Nhập tên đăng nhập"
+                      onBlur={() => handleBlur("tendangnhap")}
+                      onFocus={() => handleFocus("tendangnhap")}
                     />
-                    {formik.errors.email && formik.touched.email ? (
+                    {formik.errors.tendangnhap && formik.touched.tendangnhap ? (
                       <div className="mess-invalid mt-1">
-                        {formik.errors.email}
+                        {formik.errors.tendangnhap}
                       </div>
                     ) : null}
                   </div>
@@ -271,7 +277,7 @@ function Login() {
                     >
                       Đăng nhập
                     </button>
-                    <p className="small fw-bold mt-2 pt-1 mb-0">
+                    {/* <p className="small fw-bold mt-2 pt-1 mb-0">
                       Bạn chưa có tài khoản?
                       <Link
                         to={"/auth/registration"}
@@ -280,7 +286,7 @@ function Login() {
                       >
                         Đăng ký
                       </Link>
-                    </p>
+                    </p> */}
                   </div>
                 </form>
               </div>
