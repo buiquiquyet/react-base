@@ -1,0 +1,18 @@
+.a-setting {
+    position: relative;
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 270px;
+        border: 1px solid #ccc;
+        background-color: var(--primary-second);
+
+    }
+    .app-right {
+        margin-left: 270px;
+        flex: 1;
+        padding: 40px;
+    }
+}

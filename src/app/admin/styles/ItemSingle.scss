@@ -1,0 +1,23 @@
+.item-single {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+    svg {
+        color: white !important;
+    }
+}
+.active {
+    background-color: var(--primary);
+    color: white;
+    
+}
+.item-box {
+    display: flex;
+    align-items: center;
+}
+.svg-box {
+    display: flex;
+    align-items: center;
+    margin-right: 14px;
+}
