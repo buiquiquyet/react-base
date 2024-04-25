@@ -13,7 +13,7 @@ import ChairmanProfile from "./ChairmanProfile";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
 import SideBarAdmin from "./SideBarAdmin";
-import UserManagement from "./UserManagement";
+import UserManagement from "./UserManagement/UserManagement";
 interface AdminSettingRoute {
   title: string;
   icon: string;
@@ -52,8 +52,6 @@ function AdminSetting() {
     }, 1500);
     return () => clearTimeout(timeSpinner);
   }, []);
-  console.log(location.pathname.split("/")[2]);
-
   return (
     <>
       {loading ? (
@@ -93,7 +91,7 @@ function AdminSetting() {
                 ))}
                 <Route
                   index
-                  element={<Navigate to="/admin/intructor-profile" />}
+                  element={<Navigate to="/admin/user-managerment" />}
                 />
               </Routes>
             </div>

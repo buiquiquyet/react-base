@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/auth/authCrud";
+import BaseMessageLog from "@/layout/component/BaseMessageLog";
 const initialValues = {
   tendangnhap: "",
   password: "",
@@ -63,7 +64,8 @@ function Login() {
           .matches(/^[a-zA-Z0-9_]+$/i)
           .isValidSync(values.tendangnhap)
       ) {
-        errors.tendangnhap = "Vui lòng không nhập ký tự đặc biệt và khoảng trắng";
+        errors.tendangnhap =
+          "Vui lòng không nhập ký tự đặc biệt và khoảng trắng";
       }
       if (!values.password) {
         errors.password = "Mật khẩu không được bỏ trống";
@@ -187,9 +189,7 @@ function Login() {
                       onFocus={() => handleFocus("tendangnhap")}
                     />
                     {formik.errors.tendangnhap && formik.touched.tendangnhap ? (
-                      <div className="mess-invalid mt-1">
-                        {formik.errors.tendangnhap}
-                      </div>
+                      <BaseMessageLog text={formik.errors.tendangnhap} />
                     ) : null}
                   </div>
 
@@ -237,9 +237,9 @@ function Login() {
                     </div>
                     {(formik.errors.password && formik.touched.password) ||
                     errorMessage !== "" ? (
-                      <div className="mess-invalid mt-1">
-                        {formik.errors.password || errorMessage}
-                      </div>
+                      <BaseMessageLog
+                        text={formik.errors.password || errorMessage}
+                      />
                     ) : null}
                   </div>
 

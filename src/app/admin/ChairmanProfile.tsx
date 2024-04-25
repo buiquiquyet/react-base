@@ -1,5 +1,4 @@
 import BaseTableAdmin from "../../layout/component/Base-table-admin";
-const rowsPerPageOptions = [5, 10, 20, 50];
 const data = [
   { id: '11', name: "1", age: "18", faculty: "CNTT" },
   { id: '12', name: "2", age: "18", faculty: "CNTT" },
@@ -20,7 +19,6 @@ function ChairmanProfile() {
       <BaseTableAdmin
         columns={column}
         data={data}
-        rowsPerPageOptions={rowsPerPageOptions}
       />
     </div>
   );
