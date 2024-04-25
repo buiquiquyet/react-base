@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import SVG from "react-inlinesvg";
+import { ButtonColor, ButtonVariant } from "./constances/button.const";
 interface PropsButton {
   title?: string;
   icon?: any;
@@ -9,22 +10,9 @@ interface PropsButton {
   className?: string;
   disabled?: boolean;
   variant?: ButtonVariant;
-}
-export  enum ButtonColor {
-  Primary = "primary",
-  Secondary = "secondary",
-  Inherit = "inherit",
-  Success = "success",
-  Error = "error",
-  Info = "info",
-  Warning = "warning",
+  typeBtn?: 'button' | 'submit' | 'reset';
 }
 
-export enum ButtonVariant {
-  Contained = "contained",
-  Outlined = "outlined",
-  Text = "text",
-}
 
 const BaseButton: React.FC<PropsButton> = ({
   title,
@@ -35,6 +23,7 @@ const BaseButton: React.FC<PropsButton> = ({
   className = "",
   onClick,
   variant = ButtonVariant.Contained,
+  typeBtn
 }) => {
   return (
     <Button
@@ -44,6 +33,7 @@ const BaseButton: React.FC<PropsButton> = ({
       disabled={disabled}
       onClick={onClick}
       variant={variant}
+      type={typeBtn ?? 'submit'}
     >
       {icon && (
         <SVG src={import.meta.env.VITE_PUBLIC_URL + `/icons/${icon}.svg`} />

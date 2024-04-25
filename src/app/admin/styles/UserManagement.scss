@@ -1,0 +1,22 @@
+.use-management {
+    position: relative;
+    
+    .dialog-form {
+        padding: 0px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: space-between;
+    }
+    
+    .dialog-item {
+        display: flex;
+        flex-direction: column;
+       
+    }
+    .is-invalid {
+        border: 1px solid #f56565;
+        border-radius: 6px;
+      }
+    
+}
