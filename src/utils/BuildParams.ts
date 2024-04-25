@@ -1,10 +1,10 @@
 import { Page } from "./Page";
 import queryString from "query-string";
 export class BuildParams {
-    public static Params(page: Page ): string {
+    public static Params(page?: Page ): string {
         const params: { [key: string]: any } = {
-            page: page.pageNumber.toString(),
-            size: page.pageSize.toString(),
+            page: page?.pageNumber.toString(),
+            size: page?.pageSize.toString(),
         };
         return '?' + queryString.stringify(params);
     }

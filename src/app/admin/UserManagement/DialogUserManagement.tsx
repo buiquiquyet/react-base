@@ -5,11 +5,12 @@ import BaseSelect from "@/layout/component/BaseSelect";
 import BaseDialog from "@/layout/component/BaseDialog";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import BaseMessageLog from "@/layout/component/BaseMessageLog";
-import { getTenDangNhapUsers } from "@/redux/admin/userCrud";
+import { getTenDangNhapUsers, updateUser, getUserById} from "@/redux/admin/userCrud";
 import { createUsers } from "@/redux/admin/userCrud";
 import { ToastContainer, toast } from "react-toastify";
+import { UserModal } from "../modal/userModal";
 interface DialogProps {
   optionsCV?: any;
   optionsDe?: any;
@@ -24,7 +25,8 @@ interface DialogProps {
   valueRadio?: any;
   onChangRadio?: (value: any) => void;
   handleFecthUser: () => void;
-  typeDialog?: string
+  typeDialog?: string,
+  idUser?: any
 }
 
 const initialValues = {
@@ -32,8 +34,8 @@ const initialValues = {
   matkhau: "",
   hodem: "",
   ten: "",
-  chucvu: "",
-  khoa: "",
+  nhom_id: "",
+  id_khoa: "",
   lop: "",
   email: "",
   gioitinh: "",
@@ -56,8 +58,10 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
   valueRadio,
   onChangRadio,
   handleFecthUser,
-  typeDialog
+  typeDialog,
+  idUser
 }) => {
+  const [dataUserUpdate, setDataUserUpdate] = useState<UserModal>()
   const firstDiv = [
     {
       label: "Tên đăng nhập",
@@ -89,15 +93,15 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       placeholder: "Chọn chức vụ...",
       callback: onChangeCV,
       value: selectedOptionCV,
-      name: "chucvu",
+      name: "nhom_id",
     },
     {
       label: "Khoa",
       options: optionsDe,
-      placeholder: "Chọn khoa...",
+      placeholder: "Chọn id_khoa...",
       callback: onChangeDe,
       value: selectedOptionDe,
-      name: "khoa",
+      name: "id_khoa",
     },
     {
       label: "Lớp",
@@ -156,9 +160,9 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       const user = {
         ...values,
         gioitinh: valueRadio,
-        khoa: selectedOptionDe,
+        id_khoa: selectedOptionDe,
         lop: selectedOptionCl,
-        chucvu: selectedOptionCV,
+        nhom_id: selectedOptionCV,
       };
       createUsers(user)
         .then((res: any) => {
@@ -205,6 +209,19 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
         });
     }
   };
+  const fecthDataUserById = (idUser: any) => {
+    getUserById(idUser)
+      .then((res: any) => {
+        if(res.data.message) {
+          setDataUserUpdate(res.data.data)
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error, {autoClose: 1800})
+      })
+  }
+  console.log(dataUserUpdate);
+  
   const renderElementFistDiv = (
     label: string,
     typeInput?: string,
@@ -281,6 +298,12 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       </div>
     );
   };
+  
+  useEffect(() => {
+    if(idUser) {
+      fecthDataUserById(idUser)
+    }
+  }, [idUser])
   return (
     <BaseDialog onClickDialog={onClickDialog} label="Thêm mới">
       <ToastContainer />

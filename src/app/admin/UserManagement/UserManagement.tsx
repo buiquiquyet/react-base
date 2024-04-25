@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BaseTableAdmin from "../../../layout/component/Base-table-admin";
-import { getAllUsers, getListUsers } from "@/redux/admin/userCrud";
-import { toast } from "react-toastify";
+import { getListUsers, deleteUser, updateUsers } from "@/redux/admin/userCrud";
+import { ToastContainer, toast } from "react-toastify";
 import { Page } from "@/utils/Page";
 import BaseButton from "@/layout/component/BaseButton";
 import BasePagination from "@/layout/component/BasePagination";
@@ -12,6 +12,8 @@ import DialogUserManagerment from "./DialogUserManagement";
 import { getAllClasses } from "@/redux/admin/classCrud";
 import { getAllDepartments } from "@/redux/admin/departmentCrud";
 import { getClassesByIdKhoa } from "@/redux/admin/classCrud";
+import { ListIcons } from "@/layout/component/constances/listIcons.const";
+import BaseDialogConfirm from "@/layout/component/BaseDialogConfim";
 
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -38,6 +40,11 @@ const PositionUser = [
   { value: "TBM", label: "Trưởng Bộ Môn" },
   { value: "ADMIN", label: "Quản Trị" },
 ];
+const itemOptions = [
+  { key: "1", label: ListIcons.getIcon("Chỉnh sửa") },
+  { key: "2", label: ListIcons.getIcon("Xóa") },
+];
+
 interface ApiUserResponse {
   currentPage: number;
   datas: [];
@@ -63,11 +70,37 @@ function UserManagement() {
   const [selectedOptionCl, setSelectedOptionCl] = useState(null);
   const [isShowDialog, setIsShowDialog] = useState(false);
   const [valueRadio, setValueRadio] = useState("");
+  const [idUser, setIdUser] = useState("");
+  const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
 
+  const handleCancelDiaLogConfirm = () => {
+    setOpenDialogConfirm(false);
+  };
+  const handleOkDiaLogConfirm = () => {
+    setOpenDialogConfirm(false);
+    deleteUser(idUser)
+      .then((res: any) => {
+        if (res.data.message) {
+          toast.success(res.data.message, {
+            autoClose: 1500,
+            onClose: () => fecthDataUsers(page),
+          });
+        }
+      })
+      .catch((error: any) => {
+        toast.success(error, {
+          autoClose: 1500,
+        });
+      });
+    setOpenDialogConfirm(false);
+  };
   const handleChangeRadio = (event: any) => {
     setValueRadio(event.target.value);
   };
   const fecthDataUsers = (page: Page) => {
+    setSelectedOptionCV(null)
+    setSelectedOptionDe(null)
+    setSelectedOptionCl(null)
     getListUsers(page)
       .then((res: any) => {
         if (res.data) {
@@ -148,7 +181,7 @@ function UserManagement() {
   };
   const handleChangeDe = (value: any) => {
     setSelectedOptionDe(value);
-    setSelectedOptionCl(null)
+    setSelectedOptionCl(null);
     if (value) {
       getClassesByIdKhoa(value)
         .then((res: any) => {
@@ -185,10 +218,16 @@ function UserManagement() {
     }
     setIsShowDialog(!isShowDialog);
   };
-  const handleShowSetting =  () => {
-    console.log(1);
-    
-  }
+  const handleShowSetting = (key: any, id: any) => {
+    if (id) {
+      setIdUser(id);
+    }
+    if (key.key === "2") {
+      setOpenDialogConfirm(true);
+    } else {
+      setIsShowDialog(!isShowDialog);
+    }
+  };
   useEffect(() => {
     fecthDataDepartments();
     fecthDataClasses();
@@ -200,6 +239,7 @@ function UserManagement() {
   }, [page, dataDepartment]);
   return (
     <div className="w-100 use-management">
+      <ToastContainer />
       <div className="d-flex gap-3 mb-4">
         <div className="d-flex gap-3">
           <div>
@@ -218,7 +258,12 @@ function UserManagement() {
           </div>
         </div>
       </div>
-      <BaseTableAdmin columns={column} data={dataUsers && dataUsers.datas} onClick={handleShowSetting} />
+      <BaseTableAdmin
+        columns={column}
+        data={dataUsers && dataUsers.datas}
+        onClickShowOptios={handleShowSetting}
+        itemOptions={itemOptions}
+      />
       {dataUsers.datas && (
         <BasePagination
           totalPage={dataUsers.totalPages}
@@ -243,8 +288,16 @@ function UserManagement() {
           valueRadio={valueRadio}
           handleFecthUser={() => fecthDataUsers(page)}
           typeDialog="add"
+          idUser={idUser}
         />
       )}
+      <BaseDialogConfirm
+        text="Bạn xác nhận muốn xóa người dùng này?"
+        title="Xóa người dùng"
+        onOk={handleOkDiaLogConfirm}
+        onCancel={handleCancelDiaLogConfirm}
+        isModalOpen={openDialogConfirm}
+      />
     </div>
   );
 }

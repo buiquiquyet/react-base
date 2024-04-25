@@ -10,7 +10,7 @@ function BaseDialog({ onClickDialog, children, label }: BaseDialogProps) {
     <div className="dialog">
       <div className="over-flow"></div>
       <div className="dialog-content">
-        <div className="dialog-header">
+        <div className="dialog-header mb-3">
           <div className="dialog-title fw-bold fs-5">{label}</div>
           <div className="dialog-icon" onClick={onClickDialog}>
             <SVG

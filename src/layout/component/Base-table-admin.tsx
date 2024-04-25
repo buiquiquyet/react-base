@@ -13,12 +13,20 @@ import SVG from "react-inlinesvg";
 import { ETableColumnType } from "./constances/table.const";
 import { memo } from "react";
 import "./styles/BaseTable.scss";
+import BaseOptionSettings from "./BaseOptionSettings";
+
 interface PropsTable {
   columns: any[];
   data: any[];
-  onClick?: () => void
+  onClickShowOptios?: (key: any, id: any) => void;
+  itemOptions?: any[];
 }
-const BaseTableAdmin: React.FC<PropsTable> = ({ columns, data, onClick }) => {
+const BaseTableAdmin: React.FC<PropsTable> = ({
+  columns,
+  data,
+  onClickShowOptios,
+  itemOptions,
+}) => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
@@ -90,14 +98,19 @@ const BaseTableAdmin: React.FC<PropsTable> = ({ columns, data, onClick }) => {
                           }
                         />
                       ) : column.type === ETableColumnType.ICON ? (
-                        <div onClick={onClick}>
-                          <SVG
-                            src={
-                              import.meta.env.VITE_PUBLIC_URL +
-                              "/icons/more.svg"
-                            }
-                          ></SVG>
-                        </div>
+                        <BaseOptionSettings
+                          idItem={row.Id}
+                          onClick={onClickShowOptios}
+                          icon={
+                            <SVG
+                              src={
+                                import.meta.env.VITE_PUBLIC_URL +
+                                "/icons/more.svg"
+                              }
+                            ></SVG>
+                          }
+                          items={itemOptions}
+                        />
                       ) : (
                         row[column.accessor]
                       )}
