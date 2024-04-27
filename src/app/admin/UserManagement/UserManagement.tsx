@@ -94,13 +94,18 @@ function UserManagement() {
       });
     setOpenDialogConfirm(false);
   };
-  const handleChangeRadio = (event: any) => {
-    setValueRadio(event.target.value);
+  const handleChangeRadio = (event: any | string) => {
+    if (typeof event === "string") {
+      setValueRadio(event);
+    } else {
+      setValueRadio(event.target.value);
+    }
   };
   const fecthDataUsers = (page: Page) => {
-    setSelectedOptionCV(null)
-    setSelectedOptionDe(null)
-    setSelectedOptionCl(null)
+    setSelectedOptionCV(null);
+    setSelectedOptionDe(null);
+    setSelectedOptionCl(null);
+    setValueRadio("");
     getListUsers(page)
       .then((res: any) => {
         if (res.data) {
@@ -132,6 +137,7 @@ function UserManagement() {
         setDataUsers([] as any);
       });
   };
+
   const fecthDataClasses = () => {
     getAllClasses()
       .then((res: any) => {
@@ -216,6 +222,13 @@ function UserManagement() {
     } else {
       document.body.style.overflow = "hidden";
     }
+    if (idUser) {
+      setIdUser("");
+      setValueRadio("");
+      setSelectedOptionCV(null);
+      setSelectedOptionDe(null);
+      setSelectedOptionCl(null);
+    }
     setIsShowDialog(!isShowDialog);
   };
   const handleShowSetting = (key: any, id: any) => {
@@ -239,8 +252,8 @@ function UserManagement() {
   }, [page, dataDepartment]);
   return (
     <div className="w-100 use-management">
-      <ToastContainer />
       <div className="d-flex gap-3 mb-4">
+        <ToastContainer />
         <div className="d-flex gap-3">
           <div>
             <BaseButton
@@ -287,7 +300,6 @@ function UserManagement() {
           onChangRadio={(value) => handleChangeRadio(value)}
           valueRadio={valueRadio}
           handleFecthUser={() => fecthDataUsers(page)}
-          typeDialog="add"
           idUser={idUser}
         />
       )}
