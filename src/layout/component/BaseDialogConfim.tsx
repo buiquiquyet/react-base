@@ -1,24 +1,30 @@
 import { Modal } from "antd";
-
 interface Props {
-    onOk?: () => void,
-    onCancel?: () => void,
-    title?: string
-
+  onOk?: () => void;
+  onCancel?: () => void;
+  title: string;
+  text: string;
+  isModalOpen: boolean 
 }
-const BaseDialogConfirm: React.FC<Props> ({onOk,onCancel }) {
-    return ( 
-        <Modal
-        title="Confirm"
-        visible={visible}
-        onOk={onOk}
-        onCancel={onCancel}
-        okText="OK"
-        cancelText="Cancel"
-      >
-        <p>Are you sure you want to do this?</p>
-      </Modal>
-     );
-}
+const BaseDialogConfirm: React.FC<Props> = ({
+  onOk,
+  onCancel,
+  title,
+  text,
+  isModalOpen
+}) => {
+  return (
+    <Modal
+      title={title}
+      onOk={onOk}
+      open={isModalOpen}
+      onCancel={onCancel}
+      okText="Chấp nhận"
+      cancelText="Từ chối"
+    >
+      <div>{text}</div>
+    </Modal>
+  );
+};
 
-export default BaseDialogConfirm ;
+export default BaseDialogConfirm;

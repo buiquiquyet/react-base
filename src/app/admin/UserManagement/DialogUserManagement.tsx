@@ -5,11 +5,16 @@ import BaseSelect from "@/layout/component/BaseSelect";
 import BaseDialog from "@/layout/component/BaseDialog";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import BaseMessageLog from "@/layout/component/BaseMessageLog";
-import { getTenDangNhapUsers } from "@/redux/admin/userCrud";
+import {
+  getTenDangNhapUsers,
+  updateUser,
+  getUserById,
+} from "@/redux/admin/userCrud";
 import { createUsers } from "@/redux/admin/userCrud";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
+import { UserModal } from "../modal/userModal";
 interface DialogProps {
   optionsCV?: any;
   optionsDe?: any;
@@ -17,14 +22,15 @@ interface DialogProps {
   selectedOptionCV?: any;
   selectedOptionDe?: any;
   selectedOptionCl?: any;
-  onChangeCV?: (value: any) => void;
-  onChangeDe?: (value: any) => void;
-  onChangeCl?: (value: any) => void;
+  onChangeCV: (value: any) => void;
+  onChangeDe: (value: any) => void;
+  onChangeCl: (value: any) => void;
   onClickDialog: () => void;
   valueRadio?: any;
-  onChangRadio?: (value: any) => void;
+  onChangRadio: (value: any) => void;
   handleFecthUser: () => void;
-  typeDialog?: string
+  typeDialog?: string;
+  idUser?: any;
 }
 
 const initialValues = {
@@ -32,8 +38,8 @@ const initialValues = {
   matkhau: "",
   hodem: "",
   ten: "",
-  chucvu: "",
-  khoa: "",
+  nhom_id: "",
+  id_khoa: "",
   lop: "",
   email: "",
   gioitinh: "",
@@ -56,7 +62,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
   valueRadio,
   onChangRadio,
   handleFecthUser,
-  typeDialog
+  idUser,
 }) => {
   const firstDiv = [
     {
@@ -81,7 +87,6 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       name: "ten",
     },
   ];
-
   const secondDiv = [
     {
       label: "Chức vụ",
@@ -89,15 +94,15 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       placeholder: "Chọn chức vụ...",
       callback: onChangeCV,
       value: selectedOptionCV,
-      name: "chucvu",
+      name: "nhom_id",
     },
     {
       label: "Khoa",
       options: optionsDe,
-      placeholder: "Chọn khoa...",
+      placeholder: "Chọn id_khoa...",
       callback: onChangeDe,
       value: selectedOptionDe,
-      name: "khoa",
+      name: "id_khoa",
     },
     {
       label: "Lớp",
@@ -108,23 +113,26 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       name: "lop",
     },
   ];
+  
   const thirdDiv = [
     { label: "Ngày sinh", type: "date", name: "ngaysinh", value: "ngaysinh" },
     { label: "Email", type: "text", name: "email", value: "email" },
     { label: "Địa chỉ", type: "text", name: "diachi", value: "diachi" },
     {
       label: "Số điện thoại",
-      type: "number",
+      type: "text",
       name: "dienthoai",
       value: "dienthoai",
     },
   ];
   const [tdnUserCheck, setTdnUserCheck] = useState("");
   const [disabledBtn, setDisabledBtn] = useState(false);
+  const [dataUser, setDataUser] = useState<UserModal>(initialValues);
+  // const [dataUserUpdate, setDataUserUpdate] = useState<UserModal>()
   const DialogSchema = Yup.object().shape({
     tendangnhap: Yup.string()
       .notOneOf(
-        [tdnUserCheck],
+        idUser === '' ? [tdnUserCheck] : [],
         "Tên đăng nhập đã được sử dụng. Vui lòng đổi tên khác"
       )
       .required("Vui lòng nhập tên đăng nhập")
@@ -148,21 +156,27 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
         /^[a-zA-Z0-9_]+$/i,
         "Vui lòng không nhập ký tự đặc biệt và khoảng trắng"
       ),
+    dienthoai: Yup.string().matches(
+      /^\d*$/,
+      "Số điện thoại chỉ được chứa ký tự số"
+    ),
   });
+  
   const formik = useFormik({
-    initialValues : typeDialog === 'add' ? initialValues : initialValues,
+    initialValues:  dataUser ,
+    enableReinitialize: true,
     validationSchema: DialogSchema,
     onSubmit: (values) => {
       const user = {
         ...values,
         gioitinh: valueRadio,
-        khoa: selectedOptionDe,
+        id_khoa: selectedOptionDe,
         lop: selectedOptionCl,
-        chucvu: selectedOptionCV,
+        nhom_id: selectedOptionCV,
       };
-      createUsers(user)
-        .then((res: any) => {
-          if (res.data.message) {
+      if (idUser) {
+        updateUser(idUser, user)
+          .then((res: any) => {
             setDisabledBtn(true);
             toast.success(res.data.message, {
               autoClose: 1800,
@@ -171,17 +185,36 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
                 handleFecthUser();
               },
             });
-          } else {
-            toast.success(res.data, {
+          })
+          .catch((error: any) => {
+            toast.error(error, {
+              autoClose: 1800
+            })
+          })
+      } else {
+        createUsers(user)
+          .then((res: any) => {
+            if (res.data.message) {
+              setDisabledBtn(true);
+              toast.success(res.data.message, {
+                autoClose: 1800,
+                onClose: () => {
+                  onClickDialog();
+                  handleFecthUser();
+                },
+              });
+            } else {
+              toast.error(res.data, {
+                autoClose: 1800,
+              });
+            }
+          })
+          .catch((error: any) => {
+            toast.success(error, {
               autoClose: 1800,
             });
-          }
-        })
-        .catch((error: any) => {
-          toast.success(error, {
-            autoClose: 1800,
           });
-        });
+      }
     },
   });
   const handleBlur = (fieldName: any) => {
@@ -204,6 +237,24 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
           setTdnUserCheck("");
         });
     }
+  };
+
+  const fecthDataUserById = (idUser: any) => {
+    getUserById(idUser)
+      .then((res: any) => {
+        if (res.data.message) {
+          const data = res.data.data
+          setDataUser(data);
+          onChangeCV(data.nhom_id)
+          onChangeDe(data.id_khoa)
+          onChangeCl(data.lop)
+          onChangRadio(data.gioitinh)
+          
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error, { autoClose: 1800 });
+      });
   };
   const renderElementFistDiv = (
     label: string,
@@ -273,17 +324,37 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       <div className="dialog-item w-100">
         <FormLabel>{lable}</FormLabel>
         <Input
+          className={`${
+            formik.errors[name as keyof typeof formik.errors] &&
+            formik.touched[name as keyof typeof formik.touched]
+              ? "is-invalid"
+              : ""
+          }`}
           type={typeInput}
           name={name}
           value={formik.values[value as keyof typeof formik.values]}
           onChange={formik.handleChange}
+          onBlur={() => {
+            handleBlur(name);
+          }}
         />
+        {formik.errors[name as keyof typeof formik.values] &&
+        formik.touched[name as keyof typeof formik.values] ? (
+          <BaseMessageLog
+            text={formik.errors[name as keyof typeof formik.values]}
+          />
+        ) : null}
       </div>
     );
   };
+
+  useEffect(() => {
+    if (idUser) {
+      fecthDataUserById(idUser);
+    }
+  }, [idUser]);
   return (
     <BaseDialog onClickDialog={onClickDialog} label="Thêm mới">
-      <ToastContainer />
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
         <div className="d-flex gap-4 justify-content-between">
           <div className="col-4 d-flex flex-column gap-3">

@@ -19,13 +19,14 @@
 .dialog-content {
     z-index: 9999;
     position: relative;
-    min-width: 1000px;
-    min-height: 550px;
+    min-width: 80%;
+    // min-height: 500px;
     background-color: white;
     border-radius: 10px;
-    padding: 10px;
+    padding: 20px 10px;
     display: flex;
     flex-direction: column;
+    transition: all .2s linear;
 }
 .dialog-header {
     position: relative;

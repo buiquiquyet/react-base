@@ -39,7 +39,6 @@ const AdminSettingsRoutes: AdminSettingRoute[] = [
     key: "chairman-profile",
     element: <ChairmanProfile />,
   },
-  
 ];
 function AdminSetting() {
   const location = useLocation();
@@ -77,6 +76,14 @@ function AdminSetting() {
                     title={route.title}
                   />
                 ))}
+              </div>
+              <div className="logout-icon" onClick={() => navigate("/")}>
+                <SVG
+                  src={import.meta.env.VITE_PUBLIC_URL + "/icons/logout.svg"}
+                  fill="white"
+                  height="1.6rem"
+                  width="1.6rem"
+                ></SVG>
               </div>
             </SideBarAdmin>
 

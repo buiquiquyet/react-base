@@ -8,14 +8,23 @@ export function getListUsers(page: Page) {
   return axios.get(`${AUTH_URL}${params}`);
 }
 export function getAllUsers() {
-  const page = new Page()
+  const page = new Page();
   page.pageSize = 9999;
   page.pageNumber = 1;
   return getListUsers(page);
+}
+export function getUserById(idUser: any) {
+  return axios.get(`${AUTH_URL}/${idUser}`);
 }
 export function getTenDangNhapUsers(tendangnhap: string) {
   return axios.get(`${AUTH_URL}/tendangnhap/${tendangnhap}`);
 }
 export function createUsers(user: UserModal) {
   return axios.post(`${AUTH_URL}`, user);
+}
+export function deleteUser(userId: any) {
+  return axios.delete(`${AUTH_URL}/${userId}`);
+}
+export function updateUser(idUser: any, user: UserModal) {
+  return axios.put(`${AUTH_URL}/${idUser}`, user);
 }

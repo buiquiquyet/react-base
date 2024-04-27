@@ -15,4 +15,10 @@
         flex: 1;
         padding: 40px;
     }
+    .logout-icon {
+        position: absolute ;
+        bottom: 10px  ;
+        right: 50%;
+        transform: translateY(-50%);
+    }
 }
