@@ -20,12 +20,14 @@ interface PropsTable {
   data: any[];
   onClickShowOptios?: (key: any, id: any) => void;
   itemOptions?: any[];
+  setRowIdSelects?:any
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
   data,
   onClickShowOptios,
   itemOptions,
+  setRowIdSelects
 }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -35,6 +37,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
     setSelectAll(isChecked);
     const selectedRowIndexes = isChecked ? data.map((item) => item.Id) : [];
     setSelectedRows(selectedRowIndexes);
+    setRowIdSelects(selectedRowIndexes)
   };
 
   const handleCheckboxChange = (event: any, rowIndex: string) => {
@@ -46,6 +49,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
       newSelectedRows = newSelectedRows.filter((index) => index !== rowIndex);
     }
     setSelectedRows(newSelectedRows);
+    setRowIdSelects(newSelectedRows)
     setSelectAll(newSelectedRows.length === data.length);
   };
   return (

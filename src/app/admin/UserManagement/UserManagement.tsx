@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import BaseTableAdmin from "../../../layout/component/Base-table-admin";
-import { getListUsers, deleteUser, updateUsers } from "@/redux/admin/userCrud";
+import { getListUsers, deleteUser, deleteUsers } from "@/redux/admin/userCrud";
 import { ToastContainer, toast } from "react-toastify";
 import { Page } from "@/utils/Page";
 import BaseButton from "@/layout/component/BaseButton";
@@ -14,7 +14,8 @@ import { getAllDepartments } from "@/redux/admin/departmentCrud";
 import { getClassesByIdKhoa } from "@/redux/admin/classCrud";
 import { ListIcons } from "@/layout/component/constances/listIcons.const";
 import BaseDialogConfirm from "@/layout/component/BaseDialogConfim";
-
+import BaseSearch from "@/layout/component/BaseSearch";
+import { debounce } from "lodash";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -47,7 +48,7 @@ const itemOptions = [
 
 interface ApiUserResponse {
   currentPage: number;
-  datas: [];
+  datas: any[];
   message: string;
   totalPages: number;
   totalRecords: number;
@@ -61,6 +62,7 @@ function UserManagement() {
     totalPages: 0,
     totalRecords: 0,
   });
+  const [UserDataCoppy, setUserDataCoppy] = useState<any>([]);
   const [dataClasses, setDataClasses] = useState([]);
   const [dataDepartment, setDataDepartment] = useState([]);
   const pages: Page = new Page();
@@ -72,6 +74,7 @@ function UserManagement() {
   const [valueRadio, setValueRadio] = useState("");
   const [idUser, setIdUser] = useState("");
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
+  const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
 
   const handleCancelDiaLogConfirm = () => {
     setOpenDialogConfirm(false);
@@ -215,6 +218,7 @@ function UserManagement() {
       ...page,
       pageNumber: newPage,
     });
+    setUserDataCoppy([]);
   };
   const handleShowHideDialog = () => {
     if (isShowDialog) {
@@ -241,6 +245,49 @@ function UserManagement() {
       setIsShowDialog(!isShowDialog);
     }
   };
+  const handleDeleteUsers = () => {
+    deleteUsers(rowIdSelects)
+      .then((res: any) => {
+        if (res.data.message) {
+          setRowIdSelects([]);
+          toast.success(res.data.message, {
+            autoClose: 1800,
+            onClose: () => fecthDataUsers(page),
+          });
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error, {
+          autoClose: 1800,
+        });
+      });
+  };
+  const handleDebouncedSearch = debounce((value: string) => {
+    if (value) {
+      if (UserDataCoppy.length > 0) {
+        const newDataUser = UserDataCoppy.filter((item: any) => {
+          const fullname = item.hodem + " " + item.ten;
+          if (
+            fullname.toLocaleLowerCase().includes(value.toLocaleLowerCase())
+          ) {
+            return item;
+          }
+        });
+        if (newDataUser.length > 0)
+          setDataUsers({ ...dataUsers, datas: newDataUser });
+        else setDataUsers({ ...dataUsers, datas: [] });
+      }
+    } else {
+      setDataUsers({ ...dataUsers, datas: UserDataCoppy });
+    }
+  }, 1000);
+  const handleChangeInputSearch = (value: any) => {
+    const values = value.target.value;
+    if (UserDataCoppy.length === 0) {
+      setUserDataCoppy(dataUsers.datas);
+    }
+    handleDebouncedSearch(values);
+  };
   useEffect(() => {
     fecthDataDepartments();
     fecthDataClasses();
@@ -265,10 +312,17 @@ function UserManagement() {
           <div>
             <BaseButton
               color={ButtonColor.Error}
-              onClick={() => {}}
+              onClick={handleDeleteUsers}
               title="Xóa"
+              disabled={rowIdSelects.length === 0}
             ></BaseButton>
           </div>
+        </div>
+        <div>
+          <BaseSearch
+            placeholder="Tìm kiếm..."
+            onChange={handleChangeInputSearch}
+          />
         </div>
       </div>
       <BaseTableAdmin
@@ -276,6 +330,7 @@ function UserManagement() {
         data={dataUsers && dataUsers.datas}
         onClickShowOptios={handleShowSetting}
         itemOptions={itemOptions}
+        setRowIdSelects={setRowIdSelects}
       />
       {dataUsers.datas && (
         <BasePagination

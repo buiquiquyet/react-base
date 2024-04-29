@@ -28,3 +28,6 @@ export function deleteUser(userId: any) {
 export function updateUser(idUser: any, user: UserModal) {
   return axios.put(`${AUTH_URL}/${idUser}`, user);
 }
+export function deleteUsers(idUsers: any) {
+  return axios.delete(`${AUTH_URL}/deleteByIds`, { data: idUsers });
+}
