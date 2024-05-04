@@ -150,16 +150,16 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       .max(50, "Tên đăng nhập tối đa 50 ký tự"),
     matkhau: Yup.string()
       .min(4, "Mật khẩu phải có ít nhất 4 ký tự")
-      .max(20, "Mật khẩu chỉ tối đa 20 ký tự")
+      .max(100, "Mật khẩu chỉ tối đa 20 ký tự")
       .required("Mật khẩu không được bỏ trống")
       .matches(
         /^[a-zA-Z0-9_]+$/i,
         "Vui lòng không nhập ký tự đặc biệt và khoảng trắng"
       ),
-    dienthoai: Yup.string().matches(
-      /^\d*$/,
-      "Số điện thoại chỉ được chứa ký tự số"
-    ),
+    // dienthoai: Yup.string().matches(
+    //   /^\d*$/,
+    //   "Số điện thoại chỉ được chứa ký tự số"
+    // ),
   });
   
   const formik = useFormik({

@@ -120,7 +120,7 @@ function Login() {
                 <form onSubmit={formik.handleSubmit}>
                   <div className="d-flex flex-column gap-3 align-items-center justify-content-center justify-content-lg-start">
                     <div className="lead fw-bold mb-3 ">Đăng nhập</div>
-                    <button
+                    {/* <button
                       type="button"
                       data-mdb-button-init
                       data-mdb-ripple-init
@@ -165,12 +165,12 @@ function Login() {
                       <span className="flex-grow-1">
                         Đăng nhập với FaceBook
                       </span>
-                    </button>
+                    </button> */}
                   </div>
 
-                  <div className="divider d-flex align-items-center my-4">
+                  {/* <div className="divider d-flex align-items-center my-4">
                     <p className="text-center fw-bold mx-3 mb-0">Hoặc</p>
-                  </div>
+                  </div> */}
 
                   <div data-mdb-input-init className="form-outline mb-3">
                     <input

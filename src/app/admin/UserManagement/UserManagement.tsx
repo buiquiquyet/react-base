@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BaseTableAdmin from "@/layout/component/base-table-admin/Base-table-admin";
-import { getListUsers, deleteUser, deleteUsers } from "@/redux/admin/userCrud";
+import {
+  getListUsers,
+  deleteUser,
+  deleteUsers,
+  createManyUsers,
+} from "@/redux/admin/userCrud";
 import { ToastContainer, toast } from "react-toastify";
 import { Page } from "@/utils/Page";
-import BaseButton from "@/layout/component/base-button/BaseButton";
 import BasePagination from "@/layout/component/base-pagination/BasePagination";
-import { ButtonColor } from "@/layout/component/constances/button.const";
 import { ETableColumnType } from "@/layout/component/constances/table.const";
 import "../styles/UserManagement.scss";
 import DialogUserManagerment from "./DialogUserManagement";
@@ -14,11 +17,10 @@ import { getAllDepartments } from "@/redux/admin/departmentCrud";
 import { getClassesByIdKhoa } from "@/redux/admin/classCrud";
 import { ListIcons } from "@/layout/component/constances/listIcons.const";
 import BaseDialogConfirm from "@/layout/modal/BaseDialogConfim";
-import BaseSearch from "@/layout/component/base-search/BaseSearch";
 import { debounce } from "lodash";
 import { BuildSearch } from "@/utils/BuildSearch";
 import { BuildExcel } from "@/utils/BuildExcel";
-import { Upload } from "antd";
+import BaseHeaderTable from "@/layout/component/base-header-table/BaseHeaderTable";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -78,27 +80,49 @@ function UserManagement() {
   const [idUser, setIdUser] = useState("");
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
   const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCancelDiaLogConfirm = () => {
     setOpenDialogConfirm(false);
   };
-  const handleOkDiaLogConfirm = () => {
+  const handleOkDiaLogConfirm = async () => {
     setOpenDialogConfirm(false);
-    deleteUser(idUser)
-      .then((res: any) => {
-        if (res.data.message) {
-          toast.success(res.data.message, {
-            autoClose: 1500,
-            onClose: () => fecthDataUsers(page),
-          });
-        }
-      })
-      .catch((error: any) => {
-        toast.success(error, {
-          autoClose: 1500,
-        });
+    const rs: any = idUser
+      ? await deleteUser(idUser)
+      : await deleteUsers(rowIdSelects);
+    if (rs.data.message) {
+      !idUser && setRowIdSelects([]);
+      toast.success(rs.data.message, {
+        autoClose: 1500,
+        onClose: () => {
+          fecthDataUsers(page);
+          setIdUser("");
+        },
       });
-    setOpenDialogConfirm(false);
+    } else {
+      toast.success("Đã xảy ra lỗi", {
+        autoClose: 1500,
+      });
+    }
+    // idUser
+    //   ? deleteUser(idUser)
+    //   : deleteUsers(rowIdSelects)
+    //       .then((res: any) => {
+    //         console.log(res);
+
+    //         if (res.data.message) {
+    //           !idUser && setRowIdSelects([]);
+    //           toast.success(res.data.message, {
+    //             autoClose: 1500,
+    //             onClose: () => fecthDataUsers(page),
+    //           });
+    //         }
+    //       })
+    //       .catch((error: any) => {
+    //         toast.success(error, {
+    //           autoClose: 1500,
+    //         });
+    //       });
   };
   const handleChangeRadio = (event: any | string) => {
     if (typeof event === "string") {
@@ -248,22 +272,8 @@ function UserManagement() {
       setIsShowDialog(!isShowDialog);
     }
   };
-  const handleDeleteUsers = () => {
-    deleteUsers(rowIdSelects)
-      .then((res: any) => {
-        if (res.data.message) {
-          setRowIdSelects([]);
-          toast.success(res.data.message, {
-            autoClose: 1800,
-            onClose: () => fecthDataUsers(page),
-          });
-        }
-      })
-      .catch((error: any) => {
-        toast.error(error, {
-          autoClose: 1800,
-        });
-      });
+  const handleShowDialogDel = () => {
+    setOpenDialogConfirm(true);
   };
   const handleDebouncedSearch = debounce((value: string) => {
     if (value) {
@@ -299,6 +309,8 @@ function UserManagement() {
       "Chức vụ",
       "Email",
       "Điện thoại",
+      "Địa chỉ",
+      "Ngày sinh",
     ];
     const exportData = dataUsers.datas.map((item) => [
       item.tendangnhap,
@@ -310,13 +322,46 @@ function UserManagement() {
       item.nhom_id,
       item.email,
       item.dienthoai,
+      item.diachi,
+      item.ngaysinh,
     ]);
     BuildExcel.export(exportData, titleColumn);
   };
-  const handleImportExcel = (info: any) => {
-    console.log(dataUsers.datas);
-    const file = info.file.originFileObj;
-    BuildExcel.import(file);
+  const handleImportExcel = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const titleColumn = [
+      "tendangnhap",
+      "matkhau",
+      "hodem",
+      "ten",
+      "id_khoa",
+      "lop",
+      "nhom_id",
+      "email",
+      "dienthoai",
+      "diachi",
+      "ngaysinh",
+    ];
+    try {
+      const formattedData: any = await BuildExcel.import(file, titleColumn);
+      if (formattedData) {
+        const res: any = await createManyUsers(formattedData);
+        if (res.data.message) {
+          toast.success(res.data.message, {
+            autoClose: 1800,
+            onClose: () => fecthDataUsers(page),
+          });
+        }
+      }
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi", { autoClose: 1800 });
+    }
+  };
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
   useEffect(() => {
     fecthDataDepartments();
@@ -327,59 +372,27 @@ function UserManagement() {
       fecthDataUsers(page);
     }
   }, [page, dataDepartment]);
+
   return (
     <div className="w-100 use-management">
       <ToastContainer />
-      <div className="d-flex justify-content-between">
-        <div className="d-flex gap-3 mb-4">
-          <div className="d-flex gap-3">
-            <div>
-              <BaseButton
-                color={ButtonColor.Primary}
-                onClick={handleShowHideDialog}
-                title="Thêm mới"
-              ></BaseButton>
-            </div>
-            <div>
-              <BaseButton
-                color={ButtonColor.Error}
-                onClick={handleDeleteUsers}
-                title="Xóa"
-                disabled={rowIdSelects.length === 0}
-              ></BaseButton>
-            </div>
-          </div>
-          <div>
-            <BaseSearch
-              placeholder="Tìm kiếm..."
-              onChange={(value: any) => handleChangeInputSearch(value)}
-            />
-          </div>
-        </div>
-        <div className="d-flex gap-3">
-          <div>
-            <Upload onChange={handleImportExcel} showUploadList={false}>
-              <BaseButton
-                color={ButtonColor.Success}
-                title="Nhập excel"
-              ></BaseButton>
-            </Upload>
-          </div>
-          <div>
-            <BaseButton
-              color={ButtonColor.Info}
-              onClick={handleExportExcel}
-              title="Xuất excel"
-            ></BaseButton>
-          </div>
-        </div>
-      </div>
+      <BaseHeaderTable
+        onClickShowHideDialog={handleShowHideDialog}
+        onClickShowDialogDel={handleShowDialogDel}
+        rowIdSelects={rowIdSelects}
+        onClickChangeInputSearch={(value) => handleChangeInputSearch(value)}
+        fileInputRef={fileInputRef}
+        onClickImportExcel={(e) => handleImportExcel(e)}
+        onClickExportExcel={handleExportExcel}
+        onClickButtonInputFile={handleButtonClick}
+      />
       <BaseTableAdmin
         columns={column}
         data={dataUsers && dataUsers.datas}
         onClickShowOptios={handleShowSetting}
         itemOptions={itemOptions}
         setRowIdSelects={setRowIdSelects}
+        rowIdSelects={rowIdSelects}
       />
       {dataUsers.datas && (
         <BasePagination
@@ -408,7 +421,7 @@ function UserManagement() {
         />
       )}
       <BaseDialogConfirm
-        text="Bạn xác nhận muốn xóa người dùng này?"
+        text="Bạn xác nhận muốn xóa người dùng?"
         title="Xóa người dùng"
         onOk={handleOkDiaLogConfirm}
         onCancel={handleCancelDiaLogConfirm}
