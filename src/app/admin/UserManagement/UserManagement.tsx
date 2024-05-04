@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import BaseTableAdmin from "../../../layout/component/Base-table-admin";
+import BaseTableAdmin from "@/layout/component/base-table-admin/Base-table-admin";
 import { getListUsers, deleteUser, deleteUsers } from "@/redux/admin/userCrud";
 import { ToastContainer, toast } from "react-toastify";
 import { Page } from "@/utils/Page";
-import BaseButton from "@/layout/component/BaseButton";
-import BasePagination from "@/layout/component/BasePagination";
+import BaseButton from "@/layout/component/base-button/BaseButton";
+import BasePagination from "@/layout/component/base-pagination/BasePagination";
 import { ButtonColor } from "@/layout/component/constances/button.const";
 import { ETableColumnType } from "@/layout/component/constances/table.const";
 import "../styles/UserManagement.scss";
@@ -13,9 +13,12 @@ import { getAllClasses } from "@/redux/admin/classCrud";
 import { getAllDepartments } from "@/redux/admin/departmentCrud";
 import { getClassesByIdKhoa } from "@/redux/admin/classCrud";
 import { ListIcons } from "@/layout/component/constances/listIcons.const";
-import BaseDialogConfirm from "@/layout/component/BaseDialogConfim";
-import BaseSearch from "@/layout/component/BaseSearch";
+import BaseDialogConfirm from "@/layout/modal/BaseDialogConfim";
+import BaseSearch from "@/layout/component/base-search/BaseSearch";
 import { debounce } from "lodash";
+import { BuildSearch } from "@/utils/BuildSearch";
+import { BuildExcel } from "@/utils/BuildExcel";
+import { Upload } from "antd";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -265,14 +268,11 @@ function UserManagement() {
   const handleDebouncedSearch = debounce((value: string) => {
     if (value) {
       if (UserDataCoppy.length > 0) {
-        const newDataUser = UserDataCoppy.filter((item: any) => {
-          const fullname = item.hodem + " " + item.ten;
-          if (
-            fullname.toLocaleLowerCase().includes(value.toLocaleLowerCase())
-          ) {
-            return item;
-          }
-        });
+        const newDataUser = BuildSearch.search(
+          ["hodem", "ten"],
+          UserDataCoppy,
+          value
+        );
         if (newDataUser.length > 0)
           setDataUsers({ ...dataUsers, datas: newDataUser });
         else setDataUsers({ ...dataUsers, datas: [] });
@@ -288,6 +288,36 @@ function UserManagement() {
     }
     handleDebouncedSearch(values);
   };
+  const handleExportExcel = () => {
+    const titleColumn = [
+      "Mã",
+      "Mật khẩu",
+      "Họ đệm",
+      "Tên",
+      "Khoa",
+      "Lớp",
+      "Chức vụ",
+      "Email",
+      "Điện thoại",
+    ];
+    const exportData = dataUsers.datas.map((item) => [
+      item.tendangnhap,
+      item.matkhau,
+      item.hodem,
+      item.ten,
+      item.id_khoa,
+      item.lop,
+      item.nhom_id,
+      item.email,
+      item.dienthoai,
+    ]);
+    BuildExcel.export(exportData, titleColumn);
+  };
+  const handleImportExcel = (info: any) => {
+    console.log(dataUsers.datas);
+    const file = info.file.originFileObj;
+    BuildExcel.import(file);
+  };
   useEffect(() => {
     fecthDataDepartments();
     fecthDataClasses();
@@ -299,30 +329,49 @@ function UserManagement() {
   }, [page, dataDepartment]);
   return (
     <div className="w-100 use-management">
-      <div className="d-flex gap-3 mb-4">
-        <ToastContainer />
-        <div className="d-flex gap-3">
-          <div>
-            <BaseButton
-              color={ButtonColor.Primary}
-              onClick={handleShowHideDialog}
-              title="Thêm mới"
-            ></BaseButton>
+      <ToastContainer />
+      <div className="d-flex justify-content-between">
+        <div className="d-flex gap-3 mb-4">
+          <div className="d-flex gap-3">
+            <div>
+              <BaseButton
+                color={ButtonColor.Primary}
+                onClick={handleShowHideDialog}
+                title="Thêm mới"
+              ></BaseButton>
+            </div>
+            <div>
+              <BaseButton
+                color={ButtonColor.Error}
+                onClick={handleDeleteUsers}
+                title="Xóa"
+                disabled={rowIdSelects.length === 0}
+              ></BaseButton>
+            </div>
           </div>
           <div>
-            <BaseButton
-              color={ButtonColor.Error}
-              onClick={handleDeleteUsers}
-              title="Xóa"
-              disabled={rowIdSelects.length === 0}
-            ></BaseButton>
+            <BaseSearch
+              placeholder="Tìm kiếm..."
+              onChange={(value: any) => handleChangeInputSearch(value)}
+            />
           </div>
         </div>
-        <div>
-          <BaseSearch
-            placeholder="Tìm kiếm..."
-            onChange={handleChangeInputSearch}
-          />
+        <div className="d-flex gap-3">
+          <div>
+            <Upload onChange={handleImportExcel} showUploadList={false}>
+              <BaseButton
+                color={ButtonColor.Success}
+                title="Nhập excel"
+              ></BaseButton>
+            </Upload>
+          </div>
+          <div>
+            <BaseButton
+              color={ButtonColor.Info}
+              onClick={handleExportExcel}
+              title="Xuất excel"
+            ></BaseButton>
+          </div>
         </div>
       </div>
       <BaseTableAdmin
@@ -335,7 +384,7 @@ function UserManagement() {
       {dataUsers.datas && (
         <BasePagination
           totalPage={dataUsers.totalPages}
-          onClick={handleChangePage}
+          onClick={(event, newPage) => handleChangePage(event, newPage)}
           totalRecords={dataUsers.totalRecords}
           pageNumber={page.pageNumber}
         />

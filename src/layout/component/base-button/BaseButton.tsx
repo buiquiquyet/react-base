@@ -1,12 +1,12 @@
 import { Button } from "@mui/material";
 import SVG from "react-inlinesvg";
-import { ButtonColor, ButtonVariant } from "./constances/button.const";
+import { ButtonColor, ButtonVariant } from "../constances/button.const";
 interface PropsButton {
   title?: string;
   icon?: any;
   style?: any;
   color?: ButtonColor;
-  onClick: () => void;
+  onClick?: () => void;
   className?: string;
   disabled?: boolean;
   variant?: ButtonVariant;

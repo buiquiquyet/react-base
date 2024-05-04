@@ -1,10 +1,9 @@
-import BaseTableAdmin from "../../layout/component/Base-table-admin";
-const rowsPerPageOptions= [5, 10, 20, 50]
+import BaseTableAdmin from "../../layout/component/base-table-admin/Base-table-admin";
 
 function IntructorProfile() {
   return (
     <div className="w-100">
-      <BaseTableAdmin columns={["Họ và tên"]} data={[2]} rowsPerPageOptions={rowsPerPageOptions}/>
+      <BaseTableAdmin columns={["Họ và tên"]} data={[2]} />
     </div>
   );
 }

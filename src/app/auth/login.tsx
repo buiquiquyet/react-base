@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/auth/authCrud";
-import BaseMessageLog from "@/layout/component/BaseMessageLog";
+import BaseMessageLog from "@/layout/modal/BaseMessageLog";
 const initialValues = {
   tendangnhap: "",
   password: "",
