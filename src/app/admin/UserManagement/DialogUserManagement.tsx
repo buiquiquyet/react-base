@@ -1,12 +1,12 @@
 import { FormControlLabel, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { Input } from "antd";
-import BaseButton from "@/layout/component/BaseButton";
-import BaseSelect from "@/layout/component/BaseSelect";
-import BaseDialog from "@/layout/component/BaseDialog";
+import BaseButton from "@/layout/component/base-button/BaseButton";
+import BaseSelect from "@/layout/component/base-select/BaseSelect";
+import BaseDialog from "@/layout/modal/BaseDialog";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Fragment, useEffect, useState } from "react";
-import BaseMessageLog from "@/layout/component/BaseMessageLog";
+import BaseMessageLog from "@/layout/modal/BaseMessageLog";
 import {
   getTenDangNhapUsers,
   updateUser,
@@ -94,7 +94,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       placeholder: "Chọn chức vụ...",
       callback: onChangeCV,
       value: selectedOptionCV,
-      name: "nhom_id",
+      // name: "nhom_id",
     },
     {
       label: "Khoa",
@@ -102,7 +102,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       placeholder: "Chọn id_khoa...",
       callback: onChangeDe,
       value: selectedOptionDe,
-      name: "id_khoa",
+      // name: "id_khoa",
     },
     {
       label: "Lớp",
@@ -110,7 +110,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       placeholder: "Chọn lớp...",
       callback: onChangeCl,
       value: selectedOptionCl,
-      name: "lop",
+      // name: "lop",
     },
   ];
   
@@ -298,7 +298,6 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     placeholder?: string,
     callback?: () => void,
     value?: any,
-    name?: string
   ) => {
     return (
       <div className="dialog-item w-100">
@@ -309,7 +308,6 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
           placeholder={placeholder}
           onChangeValue={callback}
           value={value}
-          name={name}
         />
       </div>
     );
@@ -400,7 +398,6 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
                     item.placeholder,
                     item.callback,
                     item.value,
-                    item.name
                   )}
                 </Fragment>
               );

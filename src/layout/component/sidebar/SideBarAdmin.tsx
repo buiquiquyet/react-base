@@ -1,6 +1,6 @@
 
 import { PropsWithChildren } from 'react';
-import './styles/SideBarAdmin.scss'
+import './SideBarAdmin.scss'
 interface Props extends PropsWithChildren {
     title?: string
 }

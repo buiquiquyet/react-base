@@ -6,13 +6,13 @@ import {
   useNavigate,
 } from "react-router-dom";
 import "./styles/AdminSetting.scss";
-import ItemSingle from "./ItemSingle";
+import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
 import IntructorProfile from "./InstructorProfile";
 import ChairmanProfile from "./ChairmanProfile";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
-import SideBarAdmin from "./SideBarAdmin";
+import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
 import UserManagement from "./UserManagement/UserManagement";
 interface AdminSettingRoute {
   title: string;

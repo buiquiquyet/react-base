@@ -10,10 +10,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import SVG from "react-inlinesvg";
-import { ETableColumnType } from "./constances/table.const";
+import { ETableColumnType } from "../constances/table.const";
 import { memo } from "react";
-import "./styles/BaseTable.scss";
-import BaseOptionSettings from "./BaseOptionSettings";
+import "./../styles/BaseTable.scss";
+import BaseOptionSettings from "../base-option-setting/BaseOptionSettings";
 
 interface PropsTable {
   columns: any[];

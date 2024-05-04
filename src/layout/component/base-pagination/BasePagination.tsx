@@ -1,9 +1,9 @@
 import { Pagination } from "@mui/material";
-import "./styles/BasePagination.scss";
+import "./../styles/BasePagination.scss";
 import { memo } from "react";
 interface Props {
   totalPage?: number;
-  onClick?: () => void;
+  onClick?: (event: any, newPage: any) => void;
   totalRecords?: number;
   pageNumber?: number;
 }

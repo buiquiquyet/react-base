@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import "./styles/ItemSingle.scss";
+import "./ItemSingle.scss";
 import SVG from "react-inlinesvg";
 
 // export const closeSidebar = () => {
