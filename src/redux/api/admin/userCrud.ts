@@ -16,6 +16,13 @@ export function getAllUsers() {
 export function getUserById(idUser: any) {
   return axios.get(`${AUTH_URL}/${idUser}`);
 }
+export function validateUser(token: string) {
+  return axios.get(`${AUTH_URL}/validate`, {
+    params: {
+      token: `${token}`,
+    },
+  });
+}
 export function getTenDangNhapUsers(tendangnhap: string) {
   return axios.get(`${AUTH_URL}/tendangnhap/${tendangnhap}`);
 }

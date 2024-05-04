@@ -5,16 +5,21 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Spinner from "@/helper/Spinner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { login } from "@/redux/auth/authCrud";
+import { login } from "@/redux/api/auth/authCrud";
 import BaseMessageLog from "@/layout/modal/BaseMessageLog";
+import { BuildParams } from "@/utils/BuildParams";
+import { setRoles } from "@/redux/reducer/rolesSlice";
+import { useDispatch } from "react-redux";
 const initialValues = {
   tendangnhap: "",
   password: "",
 };
 function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isActiveEye, setIsActiveEye] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -34,23 +39,34 @@ function Login() {
       setDisable(true);
       login(values.tendangnhap, values.password)
         .then((res: any) => {
-          if (res.data.errorMessage) {
-            setErrorMessage(res.data.errorMessage);
-            setDisable(false);
-          } else {
+          console.log(res);
+          if (res.data) {
+            const token = res.data.token;
+            const role = res.data.role;
+            BuildParams.setLocalStorage("token", token);
             toast.success("Đăng nhập thành công.", {
               autoClose: 1800,
               onClose: () => {
-                window.location.href = "/admin";
+                dispatch(setRoles(role));
+                navigate(
+                  role === "ADMIN"
+                    ? "/admin"
+                    : role === "GVCN"
+                    ? "/teacher"
+                    : "/dean"
+                );
               },
             });
+          } else {
+            setErrorMessage(res.data.errorMessage);
+            setDisable(false);
           }
         })
         .catch(() => {
+          setDisable(false);
           toast.error("Đăng nhập không thành công.", {
             autoClose: 1800,
           });
-          setDisable(false);
         });
     },
     validate: (values) => {

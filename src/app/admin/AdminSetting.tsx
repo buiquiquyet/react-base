@@ -43,6 +43,7 @@ const AdminSettingsRoutes: AdminSettingRoute[] = [
 function AdminSetting() {
   const location = useLocation();
   const navigate = useNavigate();
+  
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {

@@ -5,16 +5,16 @@ import {
   deleteUser,
   deleteUsers,
   createManyUsers,
-} from "@/redux/admin/userCrud";
+} from "@/redux/api/admin/userCrud";
 import { ToastContainer, toast } from "react-toastify";
 import { Page } from "@/utils/Page";
 import BasePagination from "@/layout/component/base-pagination/BasePagination";
 import { ETableColumnType } from "@/layout/component/constances/table.const";
 import "../styles/UserManagement.scss";
 import DialogUserManagerment from "./DialogUserManagement";
-import { getAllClasses } from "@/redux/admin/classCrud";
-import { getAllDepartments } from "@/redux/admin/departmentCrud";
-import { getClassesByIdKhoa } from "@/redux/admin/classCrud";
+import { getAllClasses } from "@/redux/api/admin/classCrud";
+import { getAllDepartments } from "@/redux/api/admin/departmentCrud";
+import { getClassesByIdKhoa } from "@/redux/api/admin/classCrud";
 import { ListIcons } from "@/layout/component/constances/listIcons.const";
 import BaseDialogConfirm from "@/layout/modal/BaseDialogConfim";
 import { debounce } from "lodash";
@@ -104,25 +104,6 @@ function UserManagement() {
         autoClose: 1500,
       });
     }
-    // idUser
-    //   ? deleteUser(idUser)
-    //   : deleteUsers(rowIdSelects)
-    //       .then((res: any) => {
-    //         console.log(res);
-
-    //         if (res.data.message) {
-    //           !idUser && setRowIdSelects([]);
-    //           toast.success(res.data.message, {
-    //             autoClose: 1500,
-    //             onClose: () => fecthDataUsers(page),
-    //           });
-    //         }
-    //       })
-    //       .catch((error: any) => {
-    //         toast.success(error, {
-    //           autoClose: 1500,
-    //         });
-    //       });
   };
   const handleChangeRadio = (event: any | string) => {
     if (typeof event === "string") {
