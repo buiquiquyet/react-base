@@ -22,6 +22,9 @@ export function getTenDangNhapUsers(tendangnhap: string) {
 export function createUsers(user: UserModal) {
   return axios.post(`${AUTH_URL}`, user);
 }
+export function createManyUsers(users: any[]) {
+  return axios.post(`${AUTH_URL}/createMany`, users);
+}
 export function deleteUser(userId: any) {
   return axios.delete(`${AUTH_URL}/${userId}`);
 }

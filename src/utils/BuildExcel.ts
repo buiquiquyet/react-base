@@ -20,31 +20,43 @@ export class BuildExcel {
       return;
     }
   }
-  public static async import(file: File) {
+  public static async import(
+    file: File,
+    titleColumn: string[]
+  ): Promise<any[]> {
     try {
-      const fileReader = new FileReader();
-      fileReader.readAsArrayBuffer(file);
+      const data = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file);
 
-      fileReader.onload = async (event) => {
-        const data = event?.target?.result;
-        if (data) {
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-          const dataWithoutHeader = jsonData.slice(1);
-          const formattedData = dataWithoutHeader.map((row: any) => {
-            const obj: any = {};
-            for (let i = 0; i < row.length; i++) {
-              obj[jsonData[0][i]] = row[i];
-            }
-            return obj;
-          });
-          console.log(formattedData);
+        fileReader.onload = () => {
+          resolve(fileReader.result as ArrayBuffer);
+        };
+
+        fileReader.onerror = () => {
+          reject("Đã xảy ra lỗi khi đọc file.");
+        };
+      });
+
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      });
+      const dataWithoutHeader = jsonData.slice(1);
+      const formattedData = dataWithoutHeader.map((row: any) => {
+        const obj: any = {};
+        for (let i = 0; i < row.length; i++) {
+          obj[titleColumn[i]] = row[i];
         }
-      };
+        return obj;
+      });
+
+      return formattedData;
     } catch (error) {
       toast.success("Đã xảy ra lỗi.", { autoClose: 1800 });
+      return [];
     }
   }
 }

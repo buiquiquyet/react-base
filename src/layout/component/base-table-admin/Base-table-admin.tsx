@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SVG from "react-inlinesvg";
 import { ETableColumnType } from "../constances/table.const";
 import { memo } from "react";
@@ -20,14 +20,16 @@ interface PropsTable {
   data: any[];
   onClickShowOptios?: (key: any, id: any) => void;
   itemOptions?: any[];
-  setRowIdSelects?:any
+  setRowIdSelects?:any,
+  rowIdSelects?: any
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
   data,
   onClickShowOptios,
   itemOptions,
-  setRowIdSelects
+  setRowIdSelects,
+  rowIdSelects
 }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -52,6 +54,12 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
     setRowIdSelects(newSelectedRows)
     setSelectAll(newSelectedRows.length === data.length);
   };
+  useEffect(() => {
+    if( rowIdSelects && rowIdSelects.length === 0) {
+      setSelectAll(false)
+      setSelectedRows([])
+    }
+  }, [rowIdSelects])
   return (
     <div>
       <TableContainer component={Paper}>

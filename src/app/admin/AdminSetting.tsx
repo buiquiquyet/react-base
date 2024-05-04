@@ -57,9 +57,9 @@ function AdminSetting() {
         <Spinner />
       ) : (
         <div className="container-fluid a-setting">
-          <div className="row d-flex">
+          <div className="row ">
             <SideBarAdmin title="Admin">
-              <div className="mt-4">
+              <div className="d-flex">
                 {AdminSettingsRoutes.map((route, i) => (
                   <ItemSingle
                     key={i}
@@ -77,7 +77,7 @@ function AdminSetting() {
                   />
                 ))}
               </div>
-              <div className="logout-icon" onClick={() => navigate("/")}>
+              <div  onClick={() => navigate("/")}>
                 <SVG
                   src={import.meta.env.VITE_PUBLIC_URL + "/icons/logout.svg"}
                   fill="white"
@@ -87,7 +87,7 @@ function AdminSetting() {
               </div>
             </SideBarAdmin>
 
-            <div className="app-right offset-xl-1 ">
+            <div className="app-right ">
               <Routes>
                 {AdminSettingsRoutes.map((route, i) => (
                   <Route
