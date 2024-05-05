@@ -11,14 +11,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/api/auth/authCrud";
 import BaseMessageLog from "@/layout/modal/BaseMessageLog";
 import { BuildParams } from "@/utils/BuildParams";
-import { setRoles } from "@/redux/reducer/rolesSlice";
-import { useDispatch } from "react-redux";
 const initialValues = {
   tendangnhap: "",
   password: "",
 };
 function Login() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isActiveEye, setIsActiveEye] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,7 +36,6 @@ function Login() {
       setDisable(true);
       login(values.tendangnhap, values.password)
         .then((res: any) => {
-          console.log(res);
           if (res.data) {
             const token = res.data.token;
             const role = res.data.role;
@@ -47,19 +43,18 @@ function Login() {
             toast.success("Đăng nhập thành công.", {
               autoClose: 1800,
               onClose: () => {
-                dispatch(setRoles(role));
+                setDisable(false);
                 navigate(
                   role === "ADMIN"
                     ? "/admin"
                     : role === "GVCN"
                     ? "/teacher"
-                    : "/dean"
+                    : "/tbt"
                 );
               },
             });
           } else {
             setErrorMessage(res.data.errorMessage);
-            setDisable(false);
           }
         })
         .catch(() => {
@@ -105,6 +100,7 @@ function Login() {
   };
 
   useEffect(() => {
+    BuildParams.removeLocalStorage("token");
     const timeSpinner = setTimeout(() => {
       setLoading(false);
     }, 1500);

@@ -1,4 +1,4 @@
-import BaseTableAdmin from "../../layout/component/base-table-admin/Base-table-admin";
+import BaseTableAdmin from "../../../layout/component/base-table-admin/Base-table-admin";
 
 function IntructorProfile() {
   return (

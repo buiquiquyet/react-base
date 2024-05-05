@@ -1,4 +1,4 @@
-import BaseTableAdmin from "../../layout/component/base-table-admin/Base-table-admin";
+import BaseTableAdmin from "../../../layout/component/base-table-admin/Base-table-admin";
 const data = [
   { id: '11', name: "1", age: "18", faculty: "CNTT" },
   { id: '12', name: "2", age: "18", faculty: "CNTT" },

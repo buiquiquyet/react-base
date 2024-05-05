@@ -1,24 +1,39 @@
 import "./style.scss";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "@/app/auth/Login";
-import { lazy } from "react";
-import { useSelector } from "react-redux";
-import { RoleSlice } from "./redux/reducer/selector";
+import { Suspense, lazy, useEffect } from "react";
+import { validateUser } from "./redux/api/admin/userCrud";
+import { BuildParams } from "./utils/BuildParams";
+import { toast } from "react-toastify";
 import { ERole } from "./layout/component/constances/roleUser";
 const Auth = lazy(() => import("./app/auth/Auth"));
 const AdminSetting = lazy(() => import("./app/admin/AdminSetting"));
-function AppRouter() {
-  const { role } = useSelector(RoleSlice);
+const TeacherSetting = lazy(() => import("./app/teacher/TeacherSetting"));
 
+function AppRouter() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const validate = async () => {
+      const token = BuildParams.getLocalStorage("token");
+      if (token) {
+        const rs = await validateUser(token);
+        if (rs.data.error) {
+          navigate("/");
+        }
+      }
+    };
+    validate();
+  }, []);
   return (
-    <Routes>
-      <Route path="/auth/*" element={<Auth />} />
-      <Route path="/" element={<Navigate to={"/auth/login"} />} />
-      <Route path="*" element={<Login />} />
-      {role === ERole.ADMIN && (
+    <Suspense>
+      <Routes>
+        <Route path="/auth/*" element={<Auth />} />
+        <Route path="/" element={<Navigate to={"/auth/login"} />} />
+        <Route path="*" element={<Login />} />
         <Route path="/admin/*" element={<AdminSetting />} />
-      )}
-    </Routes>
+        <Route path="/teacher/*" element={<TeacherSetting />} />
+      </Routes>
+    </Suspense>
   );
 }
 
