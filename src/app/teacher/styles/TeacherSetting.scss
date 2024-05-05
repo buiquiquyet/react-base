@@ -1,0 +1,19 @@
+.t-setting {
+    position: relative;
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        height: 56px;
+        border: 1px solid #ccc;
+        background-color: var(--primary-second);
+
+    }
+    .app-right {
+        flex: 1;
+        padding: 40px;
+        margin-top: 56px;
+    }
+   
+}

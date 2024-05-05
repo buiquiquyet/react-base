@@ -5,45 +5,46 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import "./styles/AdminSetting.scss";
+import "./styles/TeacherSetting.scss";
 import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
-import IntructorProfile from "./instructor-profile/InstructorProfile";
-import ChairmanProfile from "./chairman-profile/ChairmanProfile";
+import TeacherRecords from "./teacher-records/TeacherRecords";
+import TeacherChairman from "./teacher-chairman/TeacherChairman";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
-import UserManagement from "./UserManagement/UserManagement";
-interface AdminSettingRoute {
+import TeacherProfileOther from "./teacher-profile-other/TeacherProfileOther";
+
+interface TeacherSettingRoute {
   title: string;
   icon: string;
   key: string;
   element?: JSX.Element;
 }
-const AdminSettingsRoutes: AdminSettingRoute[] = [
+const TeacherSettingsRoutes: TeacherSettingRoute[] = [
   {
-    title: "Người dùng",
-    icon: "user-managerment",
-    key: "user-managerment",
-    element: <UserManagement />,
-  },
-  {
-    title: "Hồ sơ giảng viên",
+    title: "Hồ sơ giảng dạy",
     icon: "intructor-profile",
-    key: "intructor-profile",
-    element: <IntructorProfile />,
+    key: "teacher-records",
+    element: <TeacherRecords />,
   },
   {
     title: "Hồ sơ chủ nhiệm",
     icon: "chairman-profile",
-    key: "chairman-profile",
-    element: <ChairmanProfile />,
+    key: "teacher-chairman",
+    element: <TeacherChairman />,
+  },
+  {
+    title: "Hồ sơ khác",
+    icon: "chairman-profile",
+    key: "teacher-other",
+    element: <TeacherProfileOther />,
   },
 ];
-function AdminSetting() {
+function TeacherSetting() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -57,11 +58,11 @@ function AdminSetting() {
       {loading ? (
         <Spinner />
       ) : (
-        <div className="container-fluid a-setting">
+        <div className="container-fluid t-setting">
           <div className="row ">
-            <SideBarAdmin title="Admin">
+            <SideBarAdmin title="Giáo viên">
               <div className="d-flex">
-                {AdminSettingsRoutes.map((route, i) => (
+                {TeacherSettingsRoutes.map((route, i) => (
                   <ItemSingle
                     key={i}
                     classNameString={route.key}
@@ -69,7 +70,7 @@ function AdminSetting() {
                       window.scrollTo(0, 0);
                       if (location.pathname.split("/")[2] !== route.key) {
                         // navigate("/" + route.key, { replace: true });
-                        navigate("/admin/" + route.key);
+                        navigate("/teacher/" + route.key);
                       }
                     }}
                     isActived={location.pathname.split("/")[2] === route.key}
@@ -78,7 +79,7 @@ function AdminSetting() {
                   />
                 ))}
               </div>
-              <div  onClick={() => navigate("/")}>
+              <div onClick={() => navigate("/")}>
                 <SVG
                   src={import.meta.env.VITE_PUBLIC_URL + "/icons/logout.svg"}
                   fill="white"
@@ -87,10 +88,9 @@ function AdminSetting() {
                 ></SVG>
               </div>
             </SideBarAdmin>
-
             <div className="app-right ">
               <Routes>
-                {AdminSettingsRoutes.map((route, i) => (
+                {TeacherSettingsRoutes.map((route, i) => (
                   <Route
                     key={i}
                     path={`${route.key}`}
@@ -99,7 +99,7 @@ function AdminSetting() {
                 ))}
                 <Route
                   index
-                  element={<Navigate to="/admin/user-managerment" />}
+                  element={<Navigate to="/teacher/teacher-records" />}
                 />
               </Routes>
             </div>
@@ -110,4 +110,4 @@ function AdminSetting() {
   );
 }
 
-export default AdminSetting;
+export default TeacherSetting;

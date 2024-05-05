@@ -15,4 +15,7 @@ export class BuildParams {
     public static setLocalStorage(key: string, data: any,) {
         localStorage.setItem(key, data);
     }
+    public static removeLocalStorage(key: string) {
+        localStorage.removeItem(key);
+    }
 }
