@@ -9,7 +9,7 @@ interface Props {
   placeholder?: string;
   onChangeValue?: (value: SelectOption) => void;
   className?: string;
-  value?: any
+  value?: any,
 }
 const { Option } = Select;
 
@@ -18,7 +18,7 @@ const BaseSelect: React.FC<Props> = ({
   placeholder = "Chọn giá trị",
   onChangeValue,
   className = "",
-  value
+  value,
 }) => {
   return (
     <Select

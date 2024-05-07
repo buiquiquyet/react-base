@@ -2,6 +2,7 @@
   
   interface RuntimeConfig {
     API_URL: string;
+    FILE_URL: string
   }
   
   interface Window {

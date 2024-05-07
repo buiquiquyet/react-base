@@ -3,6 +3,7 @@ import BaseSearch from "../base-search/BaseSearch";
 import { ButtonColor } from "../constances/button.const";
 import { EDisabledHeaderTableCom } from "../constances/disabledHeaderTable";
 interface Props {
+  placeholderSearch?: string,
   onClickShowHideDialog?: () => void;
   onClickShowDialogDel?: () => void;
   rowIdSelects?: any[];
@@ -14,6 +15,7 @@ interface Props {
   disabledElement?: EDisabledHeaderTableCom[];
 }
 const BaseHeaderTable: React.FC<Props> = ({
+  placeholderSearch = "Tìm kiếm...",
   onClickShowHideDialog,
   onClickShowDialogDel,
   rowIdSelects,
@@ -23,6 +25,7 @@ const BaseHeaderTable: React.FC<Props> = ({
   onClickButtonInputFile,
   onClickExportExcel,
   disabledElement,
+
 }) => {
   return (
     <div className="d-flex justify-content-between">
@@ -55,7 +58,7 @@ const BaseHeaderTable: React.FC<Props> = ({
         ) && (
           <div>
             <BaseSearch
-              placeholder="Tìm kiếm..."
+              placeholder={placeholderSearch}
               onChange={(value: any) => onClickChangeInputSearch?.(value)}
             />
           </div>

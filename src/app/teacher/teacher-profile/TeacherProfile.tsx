@@ -1,5 +1,5 @@
 
-function TeacherChairman() {
+function TeacherProfile() {
     return ( 
         <div>
             
@@ -7,4 +7,4 @@ function TeacherChairman() {
      );
 }
 
-export default TeacherChairman;
+export default TeacherProfile;

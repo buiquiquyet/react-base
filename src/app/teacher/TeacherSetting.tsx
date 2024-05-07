@@ -8,12 +8,13 @@ import {
 import "./styles/TeacherSetting.scss";
 import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
-import TeacherRecords from "./teacher-records/TeacherRecords";
-import TeacherChairman from "./teacher-chairman/TeacherChairman";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
 import TeacherProfileOther from "./teacher-profile-other/TeacherProfileOther";
+import { BuildParams } from "@/utils/BuildParams";
+import TeacherRecord from "./teacher-record/TeacherRecord";
+import TeacherProfile from "./teacher-profile/TeacherProfile";
 
 interface TeacherSettingRoute {
   title: string;
@@ -25,14 +26,14 @@ const TeacherSettingsRoutes: TeacherSettingRoute[] = [
   {
     title: "Hồ sơ giảng dạy",
     icon: "intructor-profile",
-    key: "teacher-records",
-    element: <TeacherRecords />,
+    key: "teacher-record",
+    element: <TeacherRecord />,
   },
   {
     title: "Hồ sơ chủ nhiệm",
     icon: "chairman-profile",
-    key: "teacher-chairman",
-    element: <TeacherChairman />,
+    key: "teacher-profile",
+    element: <TeacherProfile />,
   },
   {
     title: "Hồ sơ khác",
@@ -79,7 +80,12 @@ function TeacherSetting() {
                   />
                 ))}
               </div>
-              <div onClick={() => navigate("/")}>
+              <div
+                onClick={() => {
+                  navigate("/");
+                  BuildParams.removeLocalStorage("token");
+                }}
+              >
                 <SVG
                   src={import.meta.env.VITE_PUBLIC_URL + "/icons/logout.svg"}
                   fill="white"
@@ -99,7 +105,7 @@ function TeacherSetting() {
                 ))}
                 <Route
                   index
-                  element={<Navigate to="/teacher/teacher-records" />}
+                  element={<Navigate to="/teacher/teacher-record" />}
                 />
               </Routes>
             </div>

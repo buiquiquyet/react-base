@@ -15,12 +15,13 @@ import DialogUserManagerment from "./DialogUserManagement";
 import { getAllClasses } from "@/redux/api/admin/classCrud";
 import { getAllDepartments } from "@/redux/api/admin/departmentCrud";
 import { getClassesByIdKhoa } from "@/redux/api/admin/classCrud";
-import { ListIcons } from "@/layout/component/constances/listIcons.const";
 import BaseDialogConfirm from "@/layout/modal/BaseDialogConfim";
 import { debounce } from "lodash";
 import { BuildSearch } from "@/utils/BuildSearch";
 import { BuildExcel } from "@/utils/BuildExcel";
 import BaseHeaderTable from "@/layout/component/base-header-table/BaseHeaderTable";
+import { ApiResponse } from "@/layout/component/constances/api-response";
+import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -46,21 +47,9 @@ const PositionUser = [
   { value: "TBM", label: "Trưởng Bộ Môn" },
   { value: "ADMIN", label: "Quản Trị" },
 ];
-const itemOptions = [
-  { key: "1", label: ListIcons.getIcon("Chỉnh sửa") },
-  { key: "2", label: ListIcons.getIcon("Xóa") },
-];
-
-interface ApiUserResponse {
-  currentPage: number;
-  datas: any[];
-  message: string;
-  totalPages: number;
-  totalRecords: number;
-}
 
 function UserManagement() {
-  const [dataUsers, setDataUsers] = useState<ApiUserResponse>({
+  const [dataUsers, setDataUsers] = useState<ApiResponse>({
     currentPage: 1,
     datas: [],
     message: "",
@@ -80,6 +69,7 @@ function UserManagement() {
   const [idUser, setIdUser] = useState("");
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
   const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCancelDiaLogConfirm = () => {
@@ -358,6 +348,7 @@ function UserManagement() {
     <div className="w-100 use-management">
       <ToastContainer />
       <BaseHeaderTable
+        placeholderSearch="Tìm kiếm theo tên..."
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}

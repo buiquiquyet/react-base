@@ -13,7 +13,7 @@ const column = [
   { header: "Khoa", accessor: "faculty" },
   { header: "Khoa", accessor: "faculty" },
 ];
-function ChairmanProfile() {
+function RecordProfile() {
   return (
     <div className="w-100">
       <BaseTableAdmin
@@ -24,4 +24,4 @@ function ChairmanProfile() {
   );
 }
 
-export default ChairmanProfile;
+export default RecordProfile;

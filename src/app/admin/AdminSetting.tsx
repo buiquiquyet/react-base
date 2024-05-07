@@ -9,11 +9,12 @@ import "./styles/AdminSetting.scss";
 import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
 import IntructorProfile from "./instructor-profile/InstructorProfile";
-import ChairmanProfile from "./chairman-profile/ChairmanProfile";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
 import UserManagement from "./UserManagement/UserManagement";
+import { BuildParams } from "@/utils/BuildParams";
+import RecordProfile from "./record-profile/RecordProfile";
 interface AdminSettingRoute {
   title: string;
   icon: string;
@@ -37,13 +38,13 @@ const AdminSettingsRoutes: AdminSettingRoute[] = [
     title: "Hồ sơ chủ nhiệm",
     icon: "chairman-profile",
     key: "chairman-profile",
-    element: <ChairmanProfile />,
+    element: <RecordProfile />,
   },
 ];
 function AdminSetting() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -78,7 +79,12 @@ function AdminSetting() {
                   />
                 ))}
               </div>
-              <div  onClick={() => navigate("/")}>
+              <div
+                onClick={() => {
+                  navigate("/");
+                  BuildParams.removeLocalStorage("token");
+                }}
+              >
                 <SVG
                   src={import.meta.env.VITE_PUBLIC_URL + "/icons/logout.svg"}
                   fill="white"

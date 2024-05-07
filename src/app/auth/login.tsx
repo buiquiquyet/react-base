@@ -100,12 +100,12 @@ function Login() {
   };
 
   useEffect(() => {
-    BuildParams.removeLocalStorage("token");
     const timeSpinner = setTimeout(() => {
       setLoading(false);
     }, 1500);
     return () => clearTimeout(timeSpinner);
   }, []);
+ 
   return (
     <>
       {loading ? (
