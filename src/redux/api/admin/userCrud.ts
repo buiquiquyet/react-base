@@ -26,7 +26,7 @@ export function validateUser(token: string) {
 export function getTenDangNhapUsers(tendangnhap: string) {
   return axios.get(`${AUTH_URL}/tendangnhap/${tendangnhap}`);
 }
-export function createUsers(user: UserModal) {
+export function createUser(user: UserModal) {
   return axios.post(`${AUTH_URL}`, user);
 }
 export function createManyUsers(users: any[]) {

@@ -12,7 +12,7 @@ import {
   updateUser,
   getUserById,
 } from "@/redux/api/admin/userCrud";
-import { createUsers } from "@/redux/api/admin/userCrud";
+import { createUser } from "@/redux/api/admin/userCrud";
 import {  toast } from "react-toastify";
 import { UserModal } from "../modal/userModal";
 interface DialogProps {
@@ -135,18 +135,18 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
         idUser === '' ? [tdnUserCheck] : [],
         "Tên đăng nhập đã được sử dụng. Vui lòng đổi tên khác"
       )
-      .required("Vui lòng nhập tên đăng nhập")
+      .required("Trường này bắt buộc nhập")
       .min(6, "Tên đăng nhập tối thiểu 6 ký tự")
       .max(50, "Tên đăng nhập tối đa 50 ký tự")
       .matches(
         /^[a-zA-Z0-9_]+$/i,
-        "Vui lòng không nhập ký tự đặc biệt và khoảng trắng"
+        "Trường này không nhập ký tự đặc biệt và khoảng trắng"
       ),
     hodem: Yup.string()
-      .required("Vui lòng nhập họ đệm")
+      .required("Trường này bắt buộc nhập")
       .max(50, "Tên đăng nhập tối đa 50 ký tự"),
     ten: Yup.string()
-      .required("Vui lòng nhập tên")
+      .required("Trường này bắt buộc nhập")
       .max(50, "Tên đăng nhập tối đa 50 ký tự"),
     matkhau: Yup.string()
       .min(4, "Mật khẩu phải có ít nhất 4 ký tự")
@@ -154,7 +154,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       .required("Mật khẩu không được bỏ trống")
       .matches(
         /^[a-zA-Z0-9_]+$/i,
-        "Vui lòng không nhập ký tự đặc biệt và khoảng trắng"
+        "Trường này không nhập ký tự đặc biệt và khoảng trắng"
       ),
     // dienthoai: Yup.string().matches(
     //   /^\d*$/,
@@ -192,7 +192,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
             })
           })
       } else {
-        createUsers(user)
+        createUser(user)
           .then((res: any) => {
             if (res.data.message) {
               setDisabledBtn(true);

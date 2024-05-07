@@ -20,8 +20,8 @@ interface PropsTable {
   data: any[];
   onClickShowOptios?: (key: any, id: any) => void;
   itemOptions?: any[];
-  setRowIdSelects?:any,
-  rowIdSelects?: any
+  setRowIdSelects?: any;
+  rowIdSelects?: any;
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
@@ -29,17 +29,19 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
   onClickShowOptios,
   itemOptions,
   setRowIdSelects,
-  rowIdSelects
+  rowIdSelects,
 }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const handleSelectAllChange = (event: any) => {
-    const isChecked = event.target.checked;
-    setSelectAll(isChecked);
-    const selectedRowIndexes = isChecked ? data.map((item) => item.Id) : [];
-    setSelectedRows(selectedRowIndexes);
-    setRowIdSelects(selectedRowIndexes)
+    if (data) {
+      const isChecked = event.target.checked;
+      setSelectAll(isChecked);
+      const selectedRowIndexes = isChecked ? data?.map((item) => item.Id) : [];
+      setSelectedRows(selectedRowIndexes);
+      setRowIdSelects(selectedRowIndexes);
+    }
   };
 
   const handleCheckboxChange = (event: any, rowIndex: string) => {
@@ -51,22 +53,22 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
       newSelectedRows = newSelectedRows.filter((index) => index !== rowIndex);
     }
     setSelectedRows(newSelectedRows);
-    setRowIdSelects(newSelectedRows)
+    setRowIdSelects(newSelectedRows);
     setSelectAll(newSelectedRows.length === data.length);
   };
   useEffect(() => {
-    if( rowIdSelects && rowIdSelects.length === 0) {
-      setSelectAll(false)
-      setSelectedRows([])
+    if (rowIdSelects && rowIdSelects.length === 0) {
+      setSelectAll(false);
+      setSelectedRows([]);
     }
-  }, [rowIdSelects])
+  }, [rowIdSelects]);
   return (
     <div>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              {columns.map((column, index) => (
+              {columns?.map((column, index) => (
                 <TableCell
                   key={index}
                   style={{
@@ -95,7 +97,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
           </TableHead>
           <TableBody>
             {data ? (
-              data.map((row, rowIndex) => (
+              data?.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column, colIndex) => (
                     <TableCell
