@@ -22,7 +22,7 @@ interface PropsTable {
   itemOptions?: any[];
   setRowIdSelects?: any;
   rowIdSelects?: any;
-  onClickOpenFile?: () => void
+  onClickOpenFile?: (id: string) => void
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
@@ -128,8 +128,8 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           items={itemOptions}
                         />
                       ) : column.type === ETableColumnType.FILE ? (
-                        <div onClick={onClickOpenFile}>
-                          {row[column.accessor]}
+                        <div style={{cursor:"pointer"}} onClick={() => onClickOpenFile?.(row.Id)}>
+                          {`(${row[column.accessor]}  file)`}
                         </div>
                       ) : (
                         row[column.accessor]

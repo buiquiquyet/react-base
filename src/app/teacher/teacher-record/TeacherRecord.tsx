@@ -18,7 +18,11 @@ import DialogTeahcerRecordManagerment from "./DialogTeacherRecord";
 import "./../styles/TeacherRecord.scss";
 import { getAllSemesters } from "@/redux/api/teacher/SemesterCrud";
 import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
-import { deleteFileByProfileIds, getCountByRecordId } from "@/redux/api/teacher/fileCrud";
+import {
+  deleteFileByProfileIds,
+  getCountByRecordId,
+} from "@/redux/api/teacher/fileCrud";
+import BaseDialogFile from "@/layout/modal/BaseDialogFile";
 
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -60,7 +64,7 @@ function TeacherRecord() {
   const [optionsSemester, setOptionsSemester] = useState([]);
   const [listFileNames, setListFileNames] = useState([]);
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
-  const [openDialogFile, setOpenDialogFile] = useState(false);
+  const [isopenDialogFile, setIsOpenDialogFile] = useState(false);
   const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
   const [idRecord, setIdRecord] = useState("");
   const [selectedOptionSemester, setSelectedOptionSemester] = useState(null);
@@ -75,7 +79,6 @@ function TeacherRecord() {
     if (idRecord) {
       setIdRecord("");
       setSelectedOptionSemester(null);
-     
     }
     setIsShowDialog(!isShowDialog);
   };
@@ -134,7 +137,7 @@ function TeacherRecord() {
     const rs: any = idRecord
       ? await deleteRecord(idRecord)
       : await deleteRecords(rowIdSelects);
-    await deleteFileByProfileIds(idRecord ? [idRecord] : rowIdSelects)
+    await deleteFileByProfileIds(idRecord ? [idRecord] : rowIdSelects);
     if (rs.data.message) {
       !idRecord && setRowIdSelects([]);
       toast.success(rs.data.message, {
@@ -150,9 +153,15 @@ function TeacherRecord() {
       });
     }
   };
-  const handleOpenDialogFile = () => {
-    setOpenDialogFile(!openDialogFile)
-  }
+  const handleIsOpenDialogFile = (idRecord: string) => {
+
+    setIsOpenDialogFile(!isopenDialogFile);
+    fecthDataFileByIdrecord(idRecord)
+  };
+  const handleIsHidenDialogFile = () => {
+    setListFileNames([])
+    setIsOpenDialogFile(!isopenDialogFile);
+  };
   const fecthDataSemester = () => {
     getAllSemesters()
       .then((res: any) => {
@@ -171,17 +180,17 @@ function TeacherRecord() {
       });
   };
   const fecthDataRecords = (page: Page) => {
-    setListFileNames([])
+    setListFileNames([]);
     getListRecords(page)
       .then(async (res: any) => {
         if (res.data) {
           const arrResponse = await Promise.all(
             res.data.datas.map(async (item: any) => {
-              const countFile = await fechtCountFileByRecordId(item.Id);
-              if (countFile) {
+              const fileData = await fechtCountFileByRecordId(item.Id);
+              if (fileData) {
                 return {
                   ...item,
-                  countFile,
+                  countFile: fileData.countFile,
                 };
               } else return { ...item, countFile: 0 };
             })
@@ -200,12 +209,12 @@ function TeacherRecord() {
         setDataRecords([] as any);
       });
   };
+
   const fechtCountFileByRecordId = async (recordId: any) => {
     try {
       const res = await getCountByRecordId(recordId);
       if (res.data.message) {
-        setListFileNames(res.data.files)
-        return res.data.countFile;
+        return res.data;
       } else {
         return false;
       }
@@ -214,11 +223,20 @@ function TeacherRecord() {
       return false;
     }
   };
-  
+  const fecthDataFileByIdrecord = async (idRecord: string) => {
+    if (idRecord) {
+      const fileData = await fechtCountFileByRecordId(idRecord);
+      if (fileData) setListFileNames(fileData.files);
+    }
+  };
   useEffect(() => {
     fecthDataRecords(page);
     fecthDataSemester();
   }, []);
+  useEffect(() => {
+    
+    fecthDataFileByIdrecord(idRecord)
+  }, [idRecord]);
   return (
     <div className="w-100 teacher-record">
       <ToastContainer />
@@ -240,7 +258,7 @@ function TeacherRecord() {
         itemOptions={itemOptions}
         setRowIdSelects={setRowIdSelects}
         rowIdSelects={rowIdSelects}
-        onClickOpenFile={handleOpenDialogFile}
+        onClickOpenFile={handleIsOpenDialogFile}
       />
       {dataRecords.datas && (
         <BasePagination
@@ -261,6 +279,7 @@ function TeacherRecord() {
           listFiles={listFileNames}
         />
       )}
+      {isopenDialogFile && <BaseDialogFile fileList={listFileNames} onClickHideDialog={handleIsHidenDialogFile}/>}
       <BaseDialogConfirm
         text="Bạn xác nhận muốn xóa hồ sơ?"
         title="Xóa hồ sơ"
