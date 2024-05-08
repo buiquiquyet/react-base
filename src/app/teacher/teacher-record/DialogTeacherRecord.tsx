@@ -17,7 +17,9 @@ import {
   getRecordById,
   updateRecord,
 } from "@/redux/api/teacher/teacherProfileCrud";
-import { createFiles } from "@/redux/api/teacher/fileCrud";
+import { createFiles, deleteFiles } from "@/redux/api/teacher/fileCrud";
+import config from "@/utils/config";
+import { BaseIframe } from "@/layout/modal/BaseIframe";
 interface DialogProps {
   optionsSemester?: any;
   selectedOptionSemester?: any;
@@ -116,9 +118,11 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
         ten_gv: dataUserContext.hodem + " " + dataUserContext.ten,
         lop: dataUserContext.lop,
       };
-      const rsFileUpload = await createFileUpload(fileList);
       if (idRecord) {
-        if (!rsFileUpload) {
+        const rsDelFileUploads = await deleteFileUploads();
+        const newFileLists = fileList.filter((file: any) => !file.Id);
+        const rsFileUpload = await createFileUpload(newFileLists, idRecord);
+        if (!rsFileUpload && !rsDelFileUploads) {
           toast.error("Đã xảy ra lỗi.", { autoClose: 1500 });
         } else {
           updateRecord(idRecord, record)
@@ -139,40 +143,56 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
             });
         }
       } else {
-        if (!rsFileUpload) {
-          toast.error("Đã xảy ra lỗi.", { autoClose: 1500 });
-        } else {
-          createRecord(record)
-            .then((res: any) => {
-              if (res.data.message) {
-                setDisabledBtn(true);
-                toast.success(res.data.message, {
-                  autoClose: 1800,
-                  onClose: () => {
-                    onClickDialog();
-                    handleFecthRecords();
-                  },
-                });
-              } else {
-                toast.error(res.data, {
-                  autoClose: 1800,
-                });
-              }
-            })
-            .catch((error: any) => {
-              toast.success(error, {
+        createRecord(record)
+          .then(async (res: any) => {
+            if (res.data.message) {
+              await createFileUpload(fileList, res.data.recordId);
+              setDisabledBtn(true);
+              toast.success(res.data.message, {
+                autoClose: 1800,
+                onClose: () => {
+                  onClickDialog();
+                  handleFecthRecords();
+                },
+              });
+            } else {
+              toast.error(res.data, {
                 autoClose: 1800,
               });
+            }
+          })
+          .catch((error: any) => {
+            toast.success(error, {
+              autoClose: 1800,
             });
-        }
+          });
       }
     },
   });
-  const createFileUpload = async (fileList: any): Promise<boolean> => {
+  const deleteFileUploads = async () => {
+    const delFiles = listFiles
+      ?.filter((file: any) => {
+        const existsInList = fileList.some(
+          (value: any) => value.Id === file.Id
+        );
+        return !existsInList;
+      })
+      .map((file: any) => file.Id);
+    if (delFiles && delFiles.length > 0) {
+      const rs = await deleteFiles(delFiles);
+      if (rs.data.message) return true;
+      return false;
+    }
+    return;
+  };
+  const createFileUpload = async (
+    fileList: any,
+    idRecord: string
+  ): Promise<boolean> => {
     if (fileList.length > 0) {
       const promises = fileList.map((file: any) => {
         const formData = new FormData();
-        formData.append("record_id", idRecord);
+        formData.append("profile_id", idRecord);
         formData.append("ten", file.originFileObj);
         return createFiles(formData);
       });
@@ -187,8 +207,6 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
     }
   };
   const onChange = ({ fileList }: { fileList: any }) => {
-    console.log(fileList);
-    
     setFileList(fileList.slice(0, 6));
   };
 
@@ -201,9 +219,7 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
         reader.onload = () => resolve(reader.result);
       });
     }
-    const iframe = document.createElement('iframe');
-    iframe.src = src;
-    document.body.appendChild(iframe);
+    BaseIframe.openIframe(file, src);
   };
   const handleBlur = (fieldName: any) => {
     formik.setFieldTouched(fieldName, true);
@@ -291,11 +307,9 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
       setFileList(listFiles);
     }
   }, [idRecord]);
-  console.log(fileList);
-
   return (
     <BaseDialog
-      onClickDialog={onClickDialog}
+      onClickHideDialog={onClickDialog}
       label={`${idRecord ? "Chỉnh sửa" : "Thêm mới"}`}
     >
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
@@ -345,15 +359,21 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
                   ? fileList.map((file: any) => ({
                       uid: file.uid || file.Id,
                       name: file.name || file.ten,
-                      status: file.status || "done",
-                      url: file.url || `https://localhost:7112/StaticFiles/${file.ten}`,
+                      url: file.originFileObj
+                        ? null
+                        : `${config.FILE_URL}${file.ten}`,
+                      ...file,
+                      status: "done",
                     }))
-                  : fileList
+                  : fileList.map((file: any) => ({
+                      ...file,
+                      status: "done",
+                    }))
               }
               onChange={onChange}
               onPreview={onPreview}
               multiple
-              accept=".pdf,.doc,.docx,.xlsx"
+              accept=".pdf"
             >
               <FormLabel></FormLabel>
               <Button className="d-flex align-items-center gap-1">

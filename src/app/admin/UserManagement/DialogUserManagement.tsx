@@ -352,7 +352,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     }
   }, [idUser]);
   return (
-    <BaseDialog onClickDialog={onClickDialog} label= {`${idUser ? 'Chỉnh sửa' : 'Thêm mới'}`}>
+    <BaseDialog onClickHideDialog={onClickDialog} label= {`${idUser ? 'Chỉnh sửa' : 'Thêm mới'}`}>
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
         <div className="d-flex gap-4 justify-content-between">
           <div className="col-4 d-flex flex-column gap-3">

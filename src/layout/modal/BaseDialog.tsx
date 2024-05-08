@@ -1,18 +1,18 @@
 import SVG from "react-inlinesvg";
 import './styles/BaseDialog.scss'
 interface BaseDialogProps {
-  onClickDialog?: () => void;
+  onClickHideDialog?: () => void;
   label?: string,
   children?: any;
 }
-function BaseDialog({ onClickDialog, children, label }: BaseDialogProps) {
+function BaseDialog({ onClickHideDialog, children, label }: BaseDialogProps) {
   return (
     <div className="dialog">
       <div className="over-flow"></div>
       <div className="dialog-content">
         <div className="dialog-header mb-3">
           <div className="dialog-title fw-bold fs-5">{label}</div>
-          <div className="dialog-icon" onClick={onClickDialog}>
+          <div className="dialog-icon" onClick={onClickHideDialog}>
             <SVG
               src={import.meta.env.VITE_PUBLIC_URL + "/icons/close.svg"}
             ></SVG>
