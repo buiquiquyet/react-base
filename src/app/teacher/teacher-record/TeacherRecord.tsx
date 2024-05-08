@@ -18,8 +18,7 @@ import DialogTeahcerRecordManagerment from "./DialogTeacherRecord";
 import "./../styles/TeacherRecord.scss";
 import { getAllSemesters } from "@/redux/api/teacher/SemesterCrud";
 import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
-import { getCountByRecordId } from "@/redux/api/teacher/fileCrud";
-import config from "@/utils/config";
+import { deleteFileByProfileIds, getCountByRecordId } from "@/redux/api/teacher/fileCrud";
 
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -41,7 +40,7 @@ const column = [
     accessor: "ngay_ket_thuc",
     type: ETableColumnType.TEXT,
   },
-  { label: "File", accessor: "countFile", type: ETableColumnType.TEXT },
+  { label: "File", accessor: "countFile", type: ETableColumnType.FILE },
   { label: "Ghi chú", accessor: "ghichu", type: ETableColumnType.TEXT },
   { label: "", accessor: "", type: ETableColumnType.ICON },
 ];
@@ -61,6 +60,7 @@ function TeacherRecord() {
   const [optionsSemester, setOptionsSemester] = useState([]);
   const [listFileNames, setListFileNames] = useState([]);
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
+  const [openDialogFile, setOpenDialogFile] = useState(false);
   const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
   const [idRecord, setIdRecord] = useState("");
   const [selectedOptionSemester, setSelectedOptionSemester] = useState(null);
@@ -71,6 +71,11 @@ function TeacherRecord() {
       document.body.style.overflow = "auto";
     } else {
       document.body.style.overflow = "hidden";
+    }
+    if (idRecord) {
+      setIdRecord("");
+      setSelectedOptionSemester(null);
+     
     }
     setIsShowDialog(!isShowDialog);
   };
@@ -96,7 +101,7 @@ function TeacherRecord() {
   };
   const handleDebouncedSearch = debounce((value: string) => {
     if (value) {
-      if (UserRecordCoppy.length > 0) {
+      if (UserRecordCoppy?.length > 0) {
         const newDataUser = BuildSearch.search(
           ["ten_hoc_phan"],
           UserRecordCoppy,
@@ -129,6 +134,7 @@ function TeacherRecord() {
     const rs: any = idRecord
       ? await deleteRecord(idRecord)
       : await deleteRecords(rowIdSelects);
+    await deleteFileByProfileIds(idRecord ? [idRecord] : rowIdSelects)
     if (rs.data.message) {
       !idRecord && setRowIdSelects([]);
       toast.success(rs.data.message, {
@@ -144,6 +150,9 @@ function TeacherRecord() {
       });
     }
   };
+  const handleOpenDialogFile = () => {
+    setOpenDialogFile(!openDialogFile)
+  }
   const fecthDataSemester = () => {
     getAllSemesters()
       .then((res: any) => {
@@ -162,6 +171,7 @@ function TeacherRecord() {
       });
   };
   const fecthDataRecords = (page: Page) => {
+    setListFileNames([])
     getListRecords(page)
       .then(async (res: any) => {
         if (res.data) {
@@ -230,6 +240,7 @@ function TeacherRecord() {
         itemOptions={itemOptions}
         setRowIdSelects={setRowIdSelects}
         rowIdSelects={rowIdSelects}
+        onClickOpenFile={handleOpenDialogFile}
       />
       {dataRecords.datas && (
         <BasePagination

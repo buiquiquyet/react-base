@@ -12,3 +12,9 @@ export function createFiles(files: any) {
 export function getCountByRecordId(recordId: string) {
   return axios.get(`${AUTH_URL}/record/${recordId}`);
 }
+export function deleteFiles(idFiles: any) {
+  return axios.delete(`${AUTH_URL}/deleteByIds`, { data: idFiles });
+}
+export function deleteFileByProfileIds(idProfiles: any) {
+  return axios.delete(`${AUTH_URL}/profile/deleteByIds`, { data: idProfiles });
+}

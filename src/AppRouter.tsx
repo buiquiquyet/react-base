@@ -3,7 +3,7 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
+  // useLocation,
   useNavigate,
 } from "react-router-dom";
 import Login from "@/app/auth/Login";
@@ -17,10 +17,11 @@ const TeacherSetting = lazy(() => import("./app/teacher/TeacherSetting"));
 export const MyContext = createContext(null);
 function AppRouter() {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   const [roleUser, setRoleUser] = useState("");
   const [dataUser, setDataUser] = useState(null);
+  
   const validate = async () => {
     const token = BuildParams.getLocalStorage("token");
     if (token) {
@@ -35,15 +36,14 @@ function AppRouter() {
       return;
     }
   };
+  // useEffect(() => {
+  //   if (location.pathname !== "/") {
+  //     validate();
+  //   }
+  // }, [location]);
   useEffect(() => {
-    
-    if (location.pathname !== "/") {
-      validate();
-    }
-  }, [location]);
-  useEffect(() => {
-    validate()
-  }, [])
+    validate();
+  }, []);
   useEffect(() => {
     if (roleUser)
       navigate(
@@ -56,24 +56,22 @@ function AppRouter() {
   }, [roleUser]);
   return (
     <>
-      {dataUser && (
-        <MyContext.Provider value={dataUser}>
-          <Suspense>
-            <Routes>
-              <Route path="/auth/*" element={<Auth />} />
-              <Route path="/" element={<Navigate to={"/auth/login"} />} />
-              <Route path="*" element={<Login />} />
-              {roleUser && roleUser === "ADMIN" ? (
-                <Route path="/admin/*" element={<AdminSetting />} />
-              ) : roleUser === "GVCN" ? (
-                <Route path="/teacher/*" element={<TeacherSetting />} />
-              ) : (
-                <></>
-              )}
-            </Routes>
-          </Suspense>
-        </MyContext.Provider>
-      )}
+      <MyContext.Provider value={dataUser}>
+        <Suspense>
+          <Routes>
+            <Route path="/auth/*" element={<Auth />} />
+            <Route path="/" element={<Navigate to={"/auth/login"} />} />
+            <Route path="*" element={<Login />} />
+            {roleUser && roleUser === "ADMIN" ? (
+              <Route path="/admin/*" element={<AdminSetting />} />
+            ) : roleUser === "GVCN" ? (
+              <Route path="/teacher/*" element={<TeacherSetting />} />
+            ) : (
+              <></>
+            )}
+          </Routes>
+        </Suspense>
+      </MyContext.Provider>
     </>
   );
 }

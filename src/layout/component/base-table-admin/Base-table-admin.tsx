@@ -22,6 +22,7 @@ interface PropsTable {
   itemOptions?: any[];
   setRowIdSelects?: any;
   rowIdSelects?: any;
+  onClickOpenFile?: () => void
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
@@ -30,6 +31,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
   itemOptions,
   setRowIdSelects,
   rowIdSelects,
+  onClickOpenFile
 }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -125,6 +127,10 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           }
                           items={itemOptions}
                         />
+                      ) : column.type === ETableColumnType.FILE ? (
+                        <div onClick={onClickOpenFile}>
+                          {row[column.accessor]}
+                        </div>
                       ) : (
                         row[column.accessor]
                       )}
