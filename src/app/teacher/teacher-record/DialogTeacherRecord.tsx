@@ -304,9 +304,14 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   useEffect(() => {
     if (idRecord) {
       fecthDataRecordById(idRecord);
-      setFileList(listFiles);
     }
   }, [idRecord]);
+  useEffect(() => {
+    if (idRecord && listFiles && listFiles.length > 0) {
+      setFileList(listFiles);
+    }
+  }, [idRecord,listFiles]);
+
   return (
     <BaseDialog
       onClickHideDialog={onClickDialog}
@@ -373,6 +378,7 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
               onChange={onChange}
               onPreview={onPreview}
               multiple
+              
               accept=".pdf"
             >
               <FormLabel></FormLabel>
