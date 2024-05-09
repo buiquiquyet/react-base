@@ -16,19 +16,28 @@ import {
   createRecord,
   getRecordById,
   updateRecord,
-} from "@/redux/api/teacher/teacherProfileCrud";
+} from "@/redux/api/teacher/teacherRecordCrud";
 import { createFiles, deleteFiles } from "@/redux/api/teacher/fileCrud";
 import config from "@/utils/config";
 import { BaseIframe } from "@/layout/modal/BaseIframe";
+import {
+  createInstructor,
+  getInstructorById,
+  updateInstructor,
+} from "@/redux/api/teacher/teacherInstructor";
+import { BuildParams } from "@/utils/BuildParams";
 interface DialogProps {
   optionsSemester?: any;
   selectedOptionSemester?: any;
+  selectedClass?: any;
   onChangeSemester: (value: any) => void;
+  onChangeClass: (value: any) => void;
   onClickDialog: () => void;
-  handleFecthRecords: () => void;
+  handleFecthProfiles: () => void;
   typeDialog?: string;
-  idRecord?: any;
+  idProfile?: any;
   listFiles?: any[];
+  optionClasses?: any[];
 }
 
 const initialValues = {
@@ -42,17 +51,19 @@ const initialValues = {
   check: "",
 };
 
-const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
+const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   optionsSemester,
   selectedOptionSemester,
   onChangeSemester,
   onClickDialog,
-  handleFecthRecords,
-  idRecord,
+  handleFecthProfiles,
+  idProfile,
   listFiles,
+  optionClasses,
+  onChangeClass,
+  selectedClass,
 }) => {
   const dataUserContext: any = useContext(MyContext);
-
   const firstDiv = [
     {
       label: "  Họ tên ",
@@ -60,16 +71,20 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
       name: "ten_gv",
       value: dataUserContext.hodem + " " + dataUserContext.ten,
     },
-    {
-      label: "Lớp",
-      type: "text",
-      name: "lop",
-      value: dataUserContext.lop,
-    },
+
     {
       label: "Học phần",
       type: "text",
       name: "ten_hoc_phan",
+    },
+  ];
+  const classDiv = [
+    {
+      label: "Lớp",
+      options: optionClasses,
+      placeholder: "Chọn lớp...",
+      callback: onChangeClass,
+      value: selectedClass,
     },
   ];
   const secondDiv = [
@@ -95,10 +110,10 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   ];
 
   const [disabledBtn, setDisabledBtn] = useState(false);
-  const [dataRecord, setDataRecord] = useState<TeacherModal>(initialValues);
+  const [dataProfile, setDataProfile] = useState<TeacherModal>(initialValues);
   const [fileList, setFileList] = useState<any>([]);
 
-  // const [dataRecordUpdate, setDataRecordUpdate] = useState<UserModal>()
+  // const [dataProfileUpdate, setDataProfileUpdate] = useState<UserModal>()
   const DialogSchema = Yup.object().shape({
     ten_hoc_phan: Yup.string().required("Trường này bắt buộc nhập"),
     ngay_bat_dau: Yup.string().required("Trường này bắt buộc nhập"),
@@ -107,65 +122,54 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   });
 
   const formik = useFormik({
-    initialValues: dataRecord,
+    initialValues: dataProfile,
     enableReinitialize: true,
     validationSchema: DialogSchema,
     onSubmit: async (values) => {
-      const record = {
+      const profile = {
         ...values,
         user_id: dataUserContext.Id,
         ky_id: selectedOptionSemester,
         ten_gv: dataUserContext.hodem + " " + dataUserContext.ten,
-        lop: dataUserContext.lop,
+        lop: selectedClass,
+        id_khoa: dataUserContext.id_khoa
       };
-      if (idRecord) {
+      if (idProfile) {
         const rsDelFileUploads = await deleteFileUploads();
         const newFileLists = fileList.filter((file: any) => !file.Id);
-        const rsFileUpload = await createFileUpload(newFileLists, idRecord);
+        const rsFileUpload = await createFileUpload(newFileLists, idProfile);
         if (!rsFileUpload && !rsDelFileUploads) {
           toast.error("Đã xảy ra lỗi.", { autoClose: 1500 });
         } else {
-          updateRecord(idRecord, record)
-            .then((res: any) => {
-              setDisabledBtn(true);
-              toast.success(res.data.message, {
-                autoClose: 1800,
-                onClose: () => {
-                  onClickDialog();
-                  handleFecthRecords();
-                },
-              });
-            })
-            .catch((error: any) => {
-              toast.error(error, {
-                autoClose: 1800,
-              });
+          const rsUpdateProfile = BuildParams.isLocation("record")
+            ? await updateRecord(idProfile, profile)
+            : await updateInstructor(idProfile, profile);
+          if (rsUpdateProfile.data.message) {
+            setDisabledBtn(true);
+            toast.success(rsUpdateProfile.data.message, {
+              autoClose: 1800,
+              onClose: () => {
+                onClickDialog();
+                handleFecthProfiles();
+              },
             });
+          }
         }
       } else {
-        createRecord(record)
-          .then(async (res: any) => {
-            if (res.data.message) {
-              await createFileUpload(fileList, res.data.recordId);
-              setDisabledBtn(true);
-              toast.success(res.data.message, {
-                autoClose: 1800,
-                onClose: () => {
-                  onClickDialog();
-                  handleFecthRecords();
-                },
-              });
-            } else {
-              toast.error(res.data, {
-                autoClose: 1800,
-              });
-            }
-          })
-          .catch((error: any) => {
-            toast.success(error, {
-              autoClose: 1800,
-            });
+        const rsCreateProfile = BuildParams.isLocation("record")
+          ? await createRecord(profile)
+          : await createInstructor(profile);
+        if (rsCreateProfile.data.message) {
+          await createFileUpload(fileList, rsCreateProfile.data.profileId);
+          setDisabledBtn(true);
+          toast.success(rsCreateProfile.data.message, {
+            autoClose: 1800,
+            onClose: () => {
+              onClickDialog();
+              handleFecthProfiles();
+            },
           });
+        }
       }
     },
   });
@@ -187,12 +191,12 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   };
   const createFileUpload = async (
     fileList: any,
-    idRecord: string
+    idProfile: string
   ): Promise<boolean> => {
     if (fileList.length > 0) {
       const promises = fileList.map((file: any) => {
         const formData = new FormData();
-        formData.append("profile_id", idRecord);
+        formData.append("profile_id", idProfile);
         formData.append("ten", file.originFileObj);
         return createFiles(formData);
       });
@@ -228,18 +232,16 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
     formik.setFieldTouched(fieldName, false);
   };
 
-  const fecthDataRecordById = (idRecord: any) => {
-    getRecordById(idRecord)
-      .then((res: any) => {
-        if (res.data.message) {
-          const data = res.data.data;
-          setDataRecord(data);
-          onChangeSemester(data.ky_id);
-        }
-      })
-      .catch((error: any) => {
-        toast.error(error, { autoClose: 1800 });
-      });
+  const fecthDataProfileById = async (idProfile: any) => {
+    const rsRecordById: any = BuildParams.isLocation("record")
+      ? await getRecordById(idProfile)
+      : await getInstructorById(idProfile);
+    if (rsRecordById.data.message) {
+      const data = rsRecordById.data.data;
+      onChangeClass(data.lop);
+      setDataProfile(data);
+      onChangeSemester(data.ky_id);
+    }
   };
   const renderElementFistDiv = (
     label: string,
@@ -302,20 +304,22 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   };
 
   useEffect(() => {
-    if (idRecord) {
-      fecthDataRecordById(idRecord);
+    if (idProfile) {
+      fecthDataProfileById(idProfile);
     }
-  }, [idRecord]);
+  }, [idProfile]);
   useEffect(() => {
-    if (idRecord && listFiles && listFiles.length > 0) {
+    if (idProfile && listFiles && listFiles.length > 0) {
       setFileList(listFiles);
     }
-  }, [idRecord,listFiles]);
-
+  }, [idProfile, listFiles]);
+  useEffect(() => {
+    onChangeClass(dataUserContext.lop)
+  }, [])
   return (
     <BaseDialog
       onClickHideDialog={onClickDialog}
-      label={`${idRecord ? "Chỉnh sửa" : "Thêm mới"}`}
+      label={`${idProfile ? "Chỉnh sửa" : "Thêm mới"}`}
     >
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
         <div className="d-flex gap-4 justify-content-between">
@@ -327,6 +331,19 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
                     item.label,
                     item.type,
                     item.name,
+                    item.value
+                  )}
+                </Fragment>
+              );
+            })}
+            {classDiv.map((item: any, index: any) => {
+              return (
+                <Fragment key={index}>
+                  {renderElementSecondDiv(
+                    item.label,
+                    item.options,
+                    item.placeholder,
+                    item.callback,
                     item.value
                   )}
                 </Fragment>
@@ -360,7 +377,7 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
               action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
               listType="text"
               fileList={
-                idRecord
+                idProfile
                   ? fileList.map((file: any) => ({
                       uid: file.uid || file.Id,
                       name: file.name || file.ten,
@@ -378,7 +395,6 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
               onChange={onChange}
               onPreview={onPreview}
               multiple
-              
               accept=".pdf"
             >
               <FormLabel></FormLabel>
@@ -399,4 +415,4 @@ const DialogTeahcerRecordManagerment: React.FC<DialogProps> = ({
   );
 };
 
-export default DialogTeahcerRecordManagerment;
+export default DialogTeahcerProfileManagerment;

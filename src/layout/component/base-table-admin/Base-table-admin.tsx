@@ -8,34 +8,38 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import SVG from "react-inlinesvg";
 import { ETableColumnType } from "../constances/table.const";
 import { memo } from "react";
 import "./../styles/BaseTable.scss";
 import BaseOptionSettings from "../base-option-setting/BaseOptionSettings";
+import { MyContext } from "@/AppRouter";
 
 interface PropsTable {
   columns: any[];
   data: any[];
-  onClickShowOptios?: (key: any, id: any) => void;
   itemOptions?: any[];
   setRowIdSelects?: any;
   rowIdSelects?: any;
-  onClickOpenFile?: (id: string) => void
+  onClickShowOptios?: (key: any, id: any) => void;
+  onClickOpenFile?: (id: string) => void;
+  onClickOpenNote?: (id: string) => void;
 }
 const BaseTableAdmin: React.FC<PropsTable> = ({
   columns,
   data,
-  onClickShowOptios,
   itemOptions,
   setRowIdSelects,
   rowIdSelects,
-  onClickOpenFile
+  onClickShowOptios,
+  onClickOpenFile,
+  onClickOpenNote,
 }) => {
+  const dataUserContext: any = useContext(MyContext);
+
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
   const handleSelectAllChange = (event: any) => {
     if (data) {
       const isChecked = event.target.checked;
@@ -104,15 +108,22 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                   {columns.map((column, colIndex) => (
                     <TableCell
                       key={colIndex}
-                      style={{ borderRight: "1px solid #ddd" }}
+                      style={{
+                        borderRight: "1px solid #ddd",
+                        width:
+                          column.type === ETableColumnType.NOTE ? "150px" : "",
+                       
+                      }}
                     >
                       {column.type === ETableColumnType.CHECKBOX_ACTION ? (
-                        <Checkbox
-                          checked={selectedRows.includes(row.Id)}
-                          onChange={(event) =>
-                            handleCheckboxChange(event, row.Id)
-                          }
-                        />
+                        <div style={{ textAlign: "center" }}>
+                          <Checkbox
+                            checked={selectedRows.includes(row.Id)}
+                            onChange={(event) =>
+                              handleCheckboxChange(event, row.Id)
+                            }
+                          />
+                        </div>
                       ) : column.type === ETableColumnType.ICON ? (
                         <BaseOptionSettings
                           idItem={row.Id}
@@ -128,8 +139,59 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           items={itemOptions}
                         />
                       ) : column.type === ETableColumnType.FILE ? (
-                        <div style={{cursor:"pointer"}} onClick={() => onClickOpenFile?.(row.Id)}>
+                        <div
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            Number(row[column.accessor]) > 0
+                              ? onClickOpenFile?.(row.Id)
+                              : null
+                          }
+                        >
                           {`(${row[column.accessor]}  file)`}
+                        </div>
+                      ) : column.type === ETableColumnType.NOTE ? (
+                        <div
+                          style={{
+                            cursor: "pointer",
+                            padding: row[column.accessor] === "" ? "20px" : "",
+                            overflowWrap: "break-word",
+                            width: "100%",
+                          }}
+                          onClick={() => {
+                            console.log(1);
+
+                            if (
+                              (dataUserContext &&
+                                dataUserContext.nhom_id !== "GVCN") ||
+                              dataUserContext.nhom_id !== "ADMIN"
+                            ) {
+                              onClickOpenNote?.(row.Id);
+                            }
+                          }}
+                        >
+                          {row[column.accessor]} asdggggggggggggggggggggggggggg
+                        </div>
+                      ) : column.type === ETableColumnType.STATUS ? (
+                        <div>
+                          <div
+                            className="status-col"
+                            style={{
+                              background:
+                                row[column.accessor] === "0" ||
+                                row[column.accessor] === ""
+                                  ? "#94b8b8"
+                                  : row[column.accessor] === "1"
+                                  ? "#33ff33"
+                                  : "#ff704d",
+                            }}
+                          >
+                            {row[column.accessor] === "0" ||
+                            row[column.accessor] === ""
+                              ? "Chờ duyệt"
+                              : row[column.accessor] === "1"
+                              ? "Đã duyệt"
+                              : "Không duyệt"}
+                          </div>
                         </div>
                       ) : (
                         row[column.accessor]

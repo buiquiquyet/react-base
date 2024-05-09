@@ -36,7 +36,7 @@ function Login() {
       setDisable(true);
       login(values.tendangnhap, values.password)
         .then((res: any) => {
-          if (res.data) {
+          if (res.data.token) {
             const token = res.data.token;
             const role = res.data.role;
             BuildParams.setLocalStorage("token", token);
@@ -55,6 +55,7 @@ function Login() {
             });
           } else {
             setErrorMessage(res.data.errorMessage);
+            setDisable(false)
           }
         })
         .catch(() => {

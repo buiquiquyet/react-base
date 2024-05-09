@@ -1,6 +1,5 @@
 import "./style.scss";
 import {
-  Navigate,
   Route,
   Routes,
   // useLocation,
@@ -14,6 +13,7 @@ import { BuildParams } from "./utils/BuildParams";
 const Auth = lazy(() => import("./app/auth/Auth"));
 const AdminSetting = lazy(() => import("./app/admin/AdminSetting"));
 const TeacherSetting = lazy(() => import("./app/teacher/TeacherSetting"));
+const TbtSetting = lazy(() => import("./app/tbt/TbtSetting"));
 export const MyContext = createContext(null);
 function AppRouter() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function AppRouter() {
 
   const [roleUser, setRoleUser] = useState("");
   const [dataUser, setDataUser] = useState(null);
-  
+
   const validate = async () => {
     const token = BuildParams.getLocalStorage("token");
     if (token) {
@@ -36,11 +36,11 @@ function AppRouter() {
       return;
     }
   };
-  // useEffect(() => {
-  //   if (location.pathname !== "/") {
-  //     validate();
-  //   }
-  // }, [location]);
+  useEffect(() => {
+    if (!BuildParams.compare("/")) {
+      validate();
+    }
+  }, [location.pathname]);
   useEffect(() => {
     validate();
   }, []);
@@ -60,14 +60,14 @@ function AppRouter() {
         <Suspense>
           <Routes>
             <Route path="/auth/*" element={<Auth />} />
-            <Route path="/" element={<Navigate to={"/auth/login"} />} />
+            {/* <Route path="/" element={<Navigate to={"/auth/login"} />} /> */}
             <Route path="*" element={<Login />} />
             {roleUser && roleUser === "ADMIN" ? (
               <Route path="/admin/*" element={<AdminSetting />} />
             ) : roleUser === "GVCN" ? (
               <Route path="/teacher/*" element={<TeacherSetting />} />
             ) : (
-              <></>
+              <Route path="/tbt/*" element={<TbtSetting />} />
             )}
           </Routes>
         </Suspense>

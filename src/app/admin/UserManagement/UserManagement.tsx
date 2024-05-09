@@ -22,6 +22,7 @@ import { BuildExcel } from "@/utils/BuildExcel";
 import BaseHeaderTable from "@/layout/component/base-header-table/BaseHeaderTable";
 import { ApiResponse } from "@/layout/component/constances/api-response";
 import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
+import { EDisabledHeaderTableCom } from "@/layout/component/constances/disabledHeaderTable";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -357,6 +358,7 @@ function UserManagement() {
         onClickImportExcel={(e) => handleImportExcel(e)}
         onClickExportExcel={handleExportExcel}
         onClickButtonInputFile={handleButtonClick}
+        disabledElement={[EDisabledHeaderTableCom.DISABLED_CHECK]}
       />
       <BaseTableAdmin
         columns={column}

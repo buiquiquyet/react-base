@@ -5,48 +5,34 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import "./styles/TeacherSetting.scss";
+import "./styles/TbtSetting.scss";
 import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
 import Spinner from "@/helper/Spinner";
 import { useContext, useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
-import TeacherProfileOther from "./teacher-profile-other/TeacherProfileOther";
 import { BuildParams } from "@/utils/BuildParams";
-import TeacherProfile from "./teacher-profile/TeacherProfile";
+import TeacherProfile from "../teacher/teacher-profile/TeacherProfile";
 import { MyContext } from "@/AppRouter";
-// import TeacherProfile from "./teacher-profile-instructor/TeacherProfileInstructor";
 
-interface TeacherSettingRoute {
+interface TbtSettingRoute {
   title: string;
   icon: string;
   key: string;
   element?: JSX.Element;
 }
-const TeacherSettingsRoutes: TeacherSettingRoute[] = [
+const TbtSettingsRoutes: TbtSettingRoute[] = [
   {
-    title: "Hồ sơ giảng dạy",
+    title: "Thanh tra",
     icon: "intructor-profile",
     key: "teacher-record",
     element: <TeacherProfile />,
   },
-  {
-    title: "Hồ sơ chủ nhiệm",
-    icon: "chairman-profile",
-    key: "teacher-instructor",
-    element: <TeacherProfile />,
-  },
-  {
-    title: "Hồ sơ khác",
-    icon: "chairman-profile",
-    key: "teacher-other",
-    element: <TeacherProfileOther />,
-  },
 ];
-function TeacherSetting() {
+function TbtSetting() {
   const location = useLocation();
   const navigate = useNavigate();
-  const dataUserContext: any = useContext(MyContext)
+  const dataUserContext: any = useContext(MyContext);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -62,9 +48,9 @@ function TeacherSetting() {
       ) : (
         <div className="container-fluid t-setting">
           <div className="row ">
-            <SideBarAdmin title="Giáo viên">
+            <SideBarAdmin>
               <div className="d-flex">
-                {TeacherSettingsRoutes.map((route, i) => (
+                {TbtSettingsRoutes.map((route, i) => (
                   <ItemSingle
                     key={i}
                     classNameString={route.key}
@@ -72,7 +58,7 @@ function TeacherSetting() {
                       window.scrollTo(0, 0);
                       if (location.pathname.split("/")[2] !== route.key) {
                         // navigate("/" + route.key, { replace: true });
-                        navigate("/teacher/" + route.key);
+                        navigate("/tbt/" + route.key);
                       }
                     }}
                     isActived={location.pathname.split("/")[2] === route.key}
@@ -82,8 +68,9 @@ function TeacherSetting() {
                 ))}
               </div>
               <div className="d-flex align-items-center gap-3">
-                <div className="fw-bold" style={{color:"white"}}>
-                  {dataUserContext && dataUserContext.hodem + " " + dataUserContext.ten}
+                <div className="fw-bold" style={{ color: "white" }}>
+                  {dataUserContext &&
+                    dataUserContext.hodem + " " + dataUserContext.ten}
                 </div>
                 <div
                   onClick={() => {
@@ -102,17 +89,14 @@ function TeacherSetting() {
             </SideBarAdmin>
             <div className="app-right ">
               <Routes>
-                {TeacherSettingsRoutes.map((route, i) => (
+                {TbtSettingsRoutes.map((route, i) => (
                   <Route
                     key={i}
                     path={`${route.key}`}
                     element={route.element}
                   ></Route>
                 ))}
-                <Route
-                  index
-                  element={<Navigate to="/teacher/teacher-record" />}
-                />
+                <Route index element={<Navigate to="/tbt/teacher-record" />} />
               </Routes>
             </div>
           </div>
@@ -122,4 +106,4 @@ function TeacherSetting() {
   );
 }
 
-export default TeacherSetting;
+export default TbtSetting;
