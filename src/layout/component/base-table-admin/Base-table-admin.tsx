@@ -112,7 +112,6 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                         borderRight: "1px solid #ddd",
                         width:
                           column.type === ETableColumnType.NOTE ? "150px" : "",
-                       
                       }}
                     >
                       {column.type === ETableColumnType.CHECKBOX_ACTION ? (
@@ -125,19 +124,21 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           />
                         </div>
                       ) : column.type === ETableColumnType.ICON ? (
-                        <BaseOptionSettings
-                          idItem={row.Id}
-                          onClick={onClickShowOptios}
-                          icon={
-                            <SVG
-                              src={
-                                import.meta.env.VITE_PUBLIC_URL +
-                                "/icons/more.svg"
-                              }
-                            ></SVG>
-                          }
-                          items={itemOptions}
-                        />
+                        <div style={{ textAlign: "center" }}>
+                          <BaseOptionSettings
+                            idItem={row.Id}
+                            onClick={onClickShowOptios}
+                            icon={
+                              <SVG
+                                src={
+                                  import.meta.env.VITE_PUBLIC_URL +
+                                  "/icons/more.svg"
+                                }
+                              ></SVG>
+                            }
+                            items={itemOptions}
+                          />
+                        </div>
                       ) : column.type === ETableColumnType.FILE ? (
                         <div
                           style={{ cursor: "pointer" }}
@@ -182,7 +183,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                                   ? "#94b8b8"
                                   : row[column.accessor] === "1"
                                   ? "#33ff33"
-                                  : "#ff704d",
+                                  : "red",
                             }}
                           >
                             {row[column.accessor] === "0" ||

@@ -38,7 +38,7 @@ import { BuildParams } from "@/utils/BuildParams";
 import { MyContext } from "@/AppRouter";
 import BaseDialogNote from "@/layout/modal/BaseDialogNote";
 
-const column = [
+const column: any = [
   {
     label: "Lớp",
     accessor: "lop",
@@ -65,16 +65,7 @@ const column = [
     type: ETableColumnType.STATUS,
   },
 ];
-if (BuildParams.starWith("/teacher")) {
-  column.push({ label: "", accessor: "", type: ETableColumnType.ICON });
-}
-if (!BuildParams.starWith("/admin")) {
-  column.unshift({
-    label: "",
-    accessor: "",
-    type: ETableColumnType.CHECKBOX_ACTION,
-  });
-}
+
 const initArrDisabled: any = [EDisabledHeaderTableCom.DISABLED_IMPORT];
 function TeacherProfile() {
   const dataUserContext: any = useContext(MyContext);
@@ -85,6 +76,7 @@ function TeacherProfile() {
     totalPages: 0,
     totalRecords: 0,
   });
+  const [columnTable, setColumnTable] = useState<any>(column);
   const [initialArrDisabled, setInitialArrDisabled] = useState(initArrDisabled);
   const [UserProfileCoppy, setProfileDataCoppy] = useState<any>([]);
   const pages: Page = new Page();
@@ -224,7 +216,6 @@ function TeacherProfile() {
   };
   const handleUpdateNote = async () => {
     console.log(1);
-    
   };
   const handleOpenDialogNote = async () => {
     setIsOpenDialogNote(!isOpenDialogNote);
@@ -329,6 +320,12 @@ function TeacherProfile() {
         setOptionClasses([] as any);
       });
   };
+  const checkIncludeColumn = (column: any, typeCheck: any) => {
+    const isIncludes = column.some((item: any) => item.type === typeCheck);
+    console.log(isIncludes);
+    
+    return isIncludes;
+  };
   useEffect(() => {
     fecthDataSemester();
     fecthDataClasses();
@@ -341,6 +338,29 @@ function TeacherProfile() {
       fecthDataProfiles(page);
     }
   }, [optionsSemester, page, location.pathname]);
+
+  useEffect(() => {
+    if (dataUserContext && columnTable?.length > 0) {
+      if (
+        dataUserContext.nhom_id === "GVCN"  &&
+        !checkIncludeColumn(columnTable, ETableColumnType.ICON)
+      ) {
+        setColumnTable((prev: any[]) => [
+          ...prev,
+          { label: "", accessor: "", type: ETableColumnType.ICON },
+        ]);
+      }
+      if (
+        dataUserContext.nhom_id !== "ADMIN" &&
+        !checkIncludeColumn(columnTable, ETableColumnType.CHECKBOX_ACTION)
+      ) {
+        setColumnTable((prev: any[]) => [
+          { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
+          ...prev,
+        ]);
+      }
+    }
+  }, [location.pathname]);
   useEffect(() => {
     if (BuildParams.starWith("/tbt")) {
       // arrDisabled.push(
@@ -376,16 +396,18 @@ function TeacherProfile() {
         onClickCheck={handleCheckProfile}
         onChangeSelectedCheckOption={handleChangeSelectedCheckOption}
       />
-      <BaseTableAdmin
-        columns={column}
-        data={dataProfiles && dataProfiles.datas}
-        onClickShowOptios={handleShowSetting}
-        itemOptions={itemOptions}
-        setRowIdSelects={setRowIdSelects}
-        rowIdSelects={rowIdSelects}
-        onClickOpenFile={handleIsOpenDialogFile}
-        onClickOpenNote={handleOpenDialogNote}
-      />
+      {columnTable?.length > 0 && (
+        <BaseTableAdmin
+          columns={columnTable}
+          data={dataProfiles && dataProfiles.datas}
+          onClickShowOptios={handleShowSetting}
+          itemOptions={itemOptions}
+          setRowIdSelects={setRowIdSelects}
+          rowIdSelects={rowIdSelects}
+          onClickOpenFile={handleIsOpenDialogFile}
+          onClickOpenNote={handleOpenDialogNote}
+        />
+      )}
       {dataProfiles.datas && (
         <BasePagination
           totalPage={dataProfiles.totalPages}
