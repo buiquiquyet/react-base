@@ -18,4 +18,13 @@ export class BuildParams {
     public static removeLocalStorage(key: string) {
         localStorage.removeItem(key);
     }
+    public static isLocation(pathName: string) {
+        return location.pathname.includes(pathName)
+    }
+    public static starWith(pathName: string) {
+        return location.pathname.startsWith(pathName)
+    }
+    public static compare(pathName: string) {
+        return location.pathname === (pathName)
+    }
 }

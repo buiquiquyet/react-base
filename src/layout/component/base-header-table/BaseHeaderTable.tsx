@@ -1,36 +1,46 @@
 import BaseButton from "../base-button/BaseButton";
 import BaseSearch from "../base-search/BaseSearch";
+import BaseSelect from "../base-select/BaseSelect";
+// import BaseSelect from "../base-select/BaseSelect";
 import { ButtonColor } from "../constances/button.const";
 import { EDisabledHeaderTableCom } from "../constances/disabledHeaderTable";
 interface Props {
-  placeholderSearch?: string,
   onClickShowHideDialog?: () => void;
   onClickShowDialogDel?: () => void;
-  rowIdSelects?: any[];
   onClickChangeInputSearch?: (value: any) => void;
-  fileInputRef?: any;
   onClickImportExcel?: (e: any) => void;
   onClickButtonInputFile?: () => void;
   onClickExportExcel?: () => void;
+  onClickCheck?: () => void;
+  onChangeSelectedCheckOption?: (valueCheck: any) => void;
+  placeholderSearch?: string;
+  fileInputRef?: any;
+  rowIdSelects?: any[];
   disabledElement?: EDisabledHeaderTableCom[];
 }
+const optionChecks = [
+  { value: "0", label: "Chờ duyệt" },
+  { value: "1", label: "Đã duyệt" },
+  { value: "2", label: "Không duyệt" },
+];
 const BaseHeaderTable: React.FC<Props> = ({
-  placeholderSearch = "Tìm kiếm...",
   onClickShowHideDialog,
   onClickShowDialogDel,
-  rowIdSelects,
+  onChangeSelectedCheckOption,
   onClickChangeInputSearch,
-  fileInputRef,
   onClickImportExcel,
   onClickButtonInputFile,
   onClickExportExcel,
+  onClickCheck,
+  placeholderSearch = "Tìm kiếm...",
+  fileInputRef,
+  rowIdSelects,
   disabledElement,
-
 }) => {
   return (
     <div className="d-flex justify-content-between">
-      <div className="d-flex gap-3 mb-4">
-        <div className="d-flex gap-3">
+      <div className="d-flex mb-4">
+        <div className="d-flex ">
           {!disabledElement?.includes(EDisabledHeaderTableCom.DISABLED_ADD) && (
             <div>
               <BaseButton
@@ -43,7 +53,7 @@ const BaseHeaderTable: React.FC<Props> = ({
           {!disabledElement?.includes(
             EDisabledHeaderTableCom.DISABLED_DELETE
           ) && (
-            <div>
+            <div style={{ margin: "0 20px" }}>
               <BaseButton
                 color={ButtonColor.Error}
                 onClick={onClickShowDialogDel}
@@ -53,6 +63,25 @@ const BaseHeaderTable: React.FC<Props> = ({
             </div>
           )}
         </div>
+        {!disabledElement?.includes(EDisabledHeaderTableCom.DISABLED_CHECK) && (
+          <div className="d-flex align-items-center" style={{marginRight:"20px"}}>
+            <div style={{ marginRight: "20px" }}>
+              <BaseButton
+                color={ButtonColor.Secondary}
+                onClick={onClickCheck}
+                title="Duyệt"
+                disabled={rowIdSelects?.length === 0}
+              ></BaseButton>
+            </div>
+            <div className="d-flex">
+              <BaseSelect
+                onChangeValue={onChangeSelectedCheckOption}
+                options={optionChecks}
+                placeholder="Chọn trạng thái..."
+              />
+            </div>
+          </div>
+        )}
         {!disabledElement?.includes(
           EDisabledHeaderTableCom.DISABLED_SEARCH
         ) && (

@@ -9,7 +9,7 @@ export function createFiles(files: any) {
     }
   });
 }
-export function getCountByRecordId(recordId: string) {
+export function getCountByProfileId(recordId: string) {
   return axios.get(`${AUTH_URL}/record/${recordId}`);
 }
 export function deleteFiles(idFiles: any) {
