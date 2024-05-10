@@ -8,13 +8,12 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SVG from "react-inlinesvg";
 import { ETableColumnType } from "../constances/table.const";
 import { memo } from "react";
 import "./../styles/BaseTable.scss";
 import BaseOptionSettings from "../base-option-setting/BaseOptionSettings";
-import { MyContext } from "@/AppRouter";
 
 interface PropsTable {
   columns: any[];
@@ -36,8 +35,6 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
   onClickOpenFile,
   onClickOpenNote,
 }) => {
-  const dataUserContext: any = useContext(MyContext);
-
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const handleSelectAllChange = (event: any) => {
@@ -106,7 +103,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
               data?.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column, colIndex) => (
-                    <TableCell
+                    <TableCell 
                       key={colIndex}
                       style={{
                         borderRight: "1px solid #ddd",
@@ -155,22 +152,18 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           style={{
                             cursor: "pointer",
                             padding: row[column.accessor] === "" ? "20px" : "",
-                            overflowWrap: "break-word",
-                            width: "100%",
+                            wordWrap: "break-word",
+                            width: "200px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            paddingBlock:"20px"
                           }}
                           onClick={() => {
-                            console.log(1);
-
-                            if (
-                              (dataUserContext &&
-                                dataUserContext.nhom_id !== "GVCN") ||
-                              dataUserContext.nhom_id !== "ADMIN"
-                            ) {
-                              onClickOpenNote?.(row.Id);
-                            }
+                            onClickOpenNote?.(row.Id);
                           }}
                         >
-                          {row[column.accessor]} asdggggggggggggggggggggggggggg
+                          {row[column.accessor]}{" "}
                         </div>
                       ) : column.type === ETableColumnType.STATUS ? (
                         <div>

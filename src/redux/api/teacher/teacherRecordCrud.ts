@@ -32,11 +32,17 @@ export function deleteRecord(idRecord: any) {
 export function updateRecord(idRecord: any, record: TeacherModal) {
   return axios.put(`${AUTH_URL}/${idRecord}`, record);
 }
-
+export function updateNoteRecord(idRecord: string, note: string) {
+  return axios.put(`${AUTH_URL}/note/${idRecord}`, note, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 export function updateCheckRecords(idRecords: any, valueCheck: string) {
   return axios.put(
     `${AUTH_URL}/updateChecks?updateChecks=${valueCheck}`,
-    idRecords, 
+    idRecords,
     {
       headers: {
         "Content-Type": "application/json",

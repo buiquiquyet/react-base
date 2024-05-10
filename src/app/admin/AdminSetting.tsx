@@ -8,13 +8,12 @@ import {
 import "./styles/AdminSetting.scss";
 import ItemSingle from "../../layout/component/sidebar/ItemSingle";
 import SVG from "react-inlinesvg";
-import IntructorProfile from "./instructor-profile/InstructorProfile";
 import Spinner from "@/helper/Spinner";
 import { useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
 import UserManagement from "./UserManagement/UserManagement";
 import { BuildParams } from "@/utils/BuildParams";
-import RecordProfile from "./record-profile/RecordProfile";
+import TeacherProfile from "../teacher/teacher-profile/TeacherProfile";
 interface AdminSettingRoute {
   title: string;
   icon: string;
@@ -31,14 +30,14 @@ const AdminSettingsRoutes: AdminSettingRoute[] = [
   {
     title: "Hồ sơ giảng viên",
     icon: "intructor-profile",
-    key: "intructor-profile",
-    element: <IntructorProfile />,
+    key: "record-profile",
+    element: <TeacherProfile />,
   },
   {
     title: "Hồ sơ chủ nhiệm",
     icon: "chairman-profile",
-    key: "chairman-profile",
-    element: <RecordProfile />,
+    key: "instructor-profile",
+    element: <TeacherProfile />,
   },
 ];
 function AdminSetting() {

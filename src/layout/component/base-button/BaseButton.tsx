@@ -6,7 +6,7 @@ interface PropsButton {
   icon?: any;
   style?: any;
   color?: ButtonColor;
-  onClick?: () => void;
+  onClick?: (value?: any) => void;
   className?: string;
   disabled?: boolean;
   variant?: ButtonVariant;

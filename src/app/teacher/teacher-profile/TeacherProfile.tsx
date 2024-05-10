@@ -7,14 +7,18 @@ import BaseDialogConfirm from "@/layout/modal/BaseDialogConfim";
 import {
   deleteRecord,
   deleteRecords,
+  getAllRecords,
   getListRecordByDepartmentId,
   getListRecordByUserId,
+  getRecordById,
   updateCheckRecords,
+  updateNoteRecord,
   // getListRecords,
 } from "@/redux/api/teacher/teacherRecordCrud";
 import {
   deleteInstructor,
   deleteInstructors,
+  getAllInstructors,
   getListInstructorByUserId,
   // getListInstructors,
 } from "@/redux/api/teacher/teacherInstructor";
@@ -37,8 +41,10 @@ import { EDisabledHeaderTableCom } from "@/layout/component/constances/disabledH
 import { BuildParams } from "@/utils/BuildParams";
 import { MyContext } from "@/AppRouter";
 import BaseDialogNote from "@/layout/modal/BaseDialogNote";
+import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
+import { BuildExcel } from "@/utils/BuildExcel";
 
-const column: any = [
+const columnRecord: any = [
   {
     label: "Lớp",
     accessor: "lop",
@@ -65,7 +71,16 @@ const column: any = [
     type: ETableColumnType.STATUS,
   },
 ];
-
+const columnInstructor: any = [
+  {
+    label: "Lớp",
+    accessor: "lop",
+    type: ETableColumnType.TEXT,
+  },
+  { label: "Đợt", accessor: "ky_id", type: ETableColumnType.TEXT },
+  { label: "Họ tên GV", accessor: "ten_gv", type: ETableColumnType.TEXT },
+  { label: "File", accessor: "countFile", type: ETableColumnType.FILE },
+];
 const initArrDisabled: any = [EDisabledHeaderTableCom.DISABLED_IMPORT];
 function TeacherProfile() {
   const dataUserContext: any = useContext(MyContext);
@@ -76,7 +91,8 @@ function TeacherProfile() {
     totalPages: 0,
     totalRecords: 0,
   });
-  const [columnTable, setColumnTable] = useState<any>(column);
+
+  const [columnTable, setColumnTable] = useState<any>(columnRecord);
   const [initialArrDisabled, setInitialArrDisabled] = useState(initArrDisabled);
   const [UserProfileCoppy, setProfileDataCoppy] = useState<any>([]);
   const pages: Page = new Page();
@@ -91,6 +107,8 @@ function TeacherProfile() {
   const [isOpenDialogNote, setIsOpenDialogNote] = useState(false);
   const [rowIdSelects, setRowIdSelects] = useState<string[]>([]);
   const [idProfile, setIdProfile] = useState("");
+  const [idRecordUpdateNote, setIdRecordUpdateNote] = useState("");
+  const [recordDataById, setRecordDataById] = useState();
   const [selectedCheck, setSelectedCheck] = useState(null);
   const [selectedOptionSemester, setSelectedOptionSemester] = useState(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -163,10 +181,10 @@ function TeacherProfile() {
   const handleOkDiaLogConfirm = async () => {
     setOpenDialogConfirm(false);
     const rs: any = idProfile
-      ? BuildParams.isLocation("record")
+      ? BuildParams.isLocation(EUrlRouter.IS_RECORD)
         ? await deleteRecord(idProfile)
         : await deleteInstructor(idProfile)
-      : BuildParams.isLocation("record")
+      : BuildParams.isLocation(EUrlRouter.IS_RECORD)
       ? await deleteRecords(rowIdSelects)
       : await deleteInstructors(rowIdSelects);
     await deleteFileByProfileIds(idProfile ? [idProfile] : rowIdSelects);
@@ -214,11 +232,30 @@ function TeacherProfile() {
       }
     } else toast.error("Chưa chọn trạng thái duyệt!", { autoClose: 1500 });
   };
-  const handleUpdateNote = async () => {
-    console.log(1);
+  const handleUpdateNote = async (note: string) => {
+    const rsUpdateNote = await updateNoteRecord(idRecordUpdateNote, note);
+    if (rsUpdateNote.data.message) {
+      setIsOpenDialogNote(!isOpenDialogNote);
+      toast.success(rsUpdateNote.data.message, {
+        autoClose: 1800,
+        onClose: () => fecthDataProfiles(page),
+      });
+    } else {
+      toast.error("Đã xảy ra lỗi thêm ghi chú!", { autoClose: 1500 });
+    }
   };
-  const handleOpenDialogNote = async () => {
+  const handleOpenDialogNote = async (idRecord: string) => {
+    const rsGetRecordById = await getRecordById(idRecord);
+    if (rsGetRecordById.data.message) {
+      setRecordDataById(rsGetRecordById.data.data);
+    } else {
+      toast.error("Đã xảy ra lỗi lấy dữ liệu!", { autoClose: 1500 });
+    }
+    setIdRecordUpdateNote(idRecord);
     setIsOpenDialogNote(!isOpenDialogNote);
+  };
+  const handleHideDialogNote = () => {
+    setIsOpenDialogNote(false);
   };
   const fecthDataSemester = () => {
     getAllSemesters()
@@ -240,9 +277,13 @@ function TeacherProfile() {
   const fecthDataProfiles = async (page: Page) => {
     setSelectedOptionSemester(null);
     setListFileNames([]);
-    const rsDataProfiles: any = BuildParams.starWith("/tbt")
+    const rsDataProfiles: any = BuildParams.starWith(EUrlRouter.SW_TBT)
       ? await getListRecordByDepartmentId(dataUserContext?.id_khoa, page)
-      : BuildParams.isLocation("record")
+      : BuildParams.starWith(EUrlRouter.SW_ADMIN)
+      ? BuildParams.isLocation(EUrlRouter.IS_RECORD)
+        ? await getAllRecords()
+        : await getAllInstructors()
+      : BuildParams.isLocation(EUrlRouter.IS_RECORD)
       ? await getListRecordByUserId(dataUserContext?.Id, page)
       : await getListInstructorByUserId(dataUserContext?.Id, page);
     if (rsDataProfiles.data.message) {
@@ -320,11 +361,74 @@ function TeacherProfile() {
         setOptionClasses([] as any);
       });
   };
+
+  const handleExportExcel = () => {
+    const titleColumnRecord = [
+      "Lớp",
+      "Học phần",
+      "Đợt",
+      "Họ tên GV",
+      "Ngày bắt đầu",
+      "Ngày kết thúc",
+      "Số file",
+      "Ghi chú",
+      "Trạng thái",
+    ];
+    const titleColumnInstructor = ["Lớp", "Đợt", "Họ tên GV", "Số file"];
+    const exportDataRecord = dataProfiles.datas.map((item) => [
+      item.lop,
+      item?.ten_hoc_phan,
+      item.ky_id,
+      item.ten_gv,
+      item?.ngay_bat_dau,
+      item?.ngay_ket_thuc,
+      item.countFile,
+      item?.ghichu,
+      item?.check === "0"
+        ? "Chờ duyệt"
+        : item.check === "1"
+        ? "Đã duyệt"
+        : "Không duyệt",
+    ]);
+    const exportDataInstructor = dataProfiles.datas.map((item) => [
+      item.lop,
+      item.ky_id,
+      item.ten_gv,
+      item.countFile,
+    ]);
+    const arrColumn = BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? titleColumnRecord
+      : titleColumnInstructor;
+    const exportData = BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? exportDataRecord
+      : exportDataInstructor;
+    BuildExcel.export(exportData, arrColumn);
+  };
   const checkIncludeColumn = (column: any, typeCheck: any) => {
     const isIncludes = column.some((item: any) => item.type === typeCheck);
-    console.log(isIncludes);
-    
     return isIncludes;
+  };
+  const handleSetColumnTableAddIcon = () => {
+    if (
+      dataUserContext.nhom_id === ERole.GVCN &&
+      !checkIncludeColumn(columnTable, ETableColumnType.ICON)
+    ) {
+      setColumnTable((prev: any[]) => [
+        ...prev,
+        { label: "", accessor: "", type: ETableColumnType.ICON },
+      ]);
+    }
+  };
+  const handleSetColumnTableAddCheckBox = () => {
+    if (
+      dataUserContext.nhom_id !== ERole.ADMIN &&
+      !checkIncludeColumn(columnTable, ETableColumnType.CHECKBOX_ACTION)
+    ) {
+      setColumnTable((prev: any[]) => [
+        { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
+        ...prev,
+      ]);
+    }
   };
   useEffect(() => {
     fecthDataSemester();
@@ -338,55 +442,48 @@ function TeacherProfile() {
       fecthDataProfiles(page);
     }
   }, [optionsSemester, page, location.pathname]);
-
   useEffect(() => {
+    setDataProfiles({
+      currentPage: 1,
+      datas: [],
+      message: "",
+      totalPages: 0,
+      totalRecords: 0,
+    });
     if (dataUserContext && columnTable?.length > 0) {
-      if (
-        dataUserContext.nhom_id === "GVCN"  &&
-        !checkIncludeColumn(columnTable, ETableColumnType.ICON)
-      ) {
-        setColumnTable((prev: any[]) => [
-          ...prev,
-          { label: "", accessor: "", type: ETableColumnType.ICON },
-        ]);
-      }
-      if (
-        dataUserContext.nhom_id !== "ADMIN" &&
-        !checkIncludeColumn(columnTable, ETableColumnType.CHECKBOX_ACTION)
-      ) {
-        setColumnTable((prev: any[]) => [
-          { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
-          ...prev,
-        ]);
-      }
+      if (BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)) {
+        setColumnTable(columnInstructor);
+      } else setColumnTable(columnRecord);
+      handleSetColumnTableAddIcon();
+      handleSetColumnTableAddCheckBox();
     }
   }, [location.pathname]);
   useEffect(() => {
-    if (BuildParams.starWith("/tbt")) {
-      // arrDisabled.push(
-      //   EDisabledHeaderTableCom.DISABLED_ADD,
-      //   EDisabledHeaderTableCom.DISABLED_DELETE
-      // );
+    if (
+      BuildParams.starWith(EUrlRouter.SW_TBT) ||
+      BuildParams.starWith(EUrlRouter.SW_ADMIN)
+    ) {
       setInitialArrDisabled((prev: any) => [
         ...prev,
         EDisabledHeaderTableCom.DISABLED_ADD,
         EDisabledHeaderTableCom.DISABLED_DELETE,
       ]);
     }
-    if (BuildParams.starWith("/teacher") || BuildParams.starWith("/admin")) {
-      // arrDisabled.push(EDisabledHeaderTableCom.DISABLED_CHECK);
+    if (
+      BuildParams.starWith(EUrlRouter.SW_TEACHER) ||
+      BuildParams.starWith(EUrlRouter.SW_ADMIN)
+    ) {
       setInitialArrDisabled((prev: any) => [
         ...prev,
         EDisabledHeaderTableCom.DISABLED_CHECK,
       ]);
     }
   }, []);
-
   return (
     <div className="w-100 teacher-profile">
       <ToastContainer />
       <BaseHeaderTable
-        placeholderSearch="Tìm kiếm theo tên học phần..."
+        placeholderSearch={BuildParams.isLocation(EUrlRouter.IS_RECORD) ? "Tìm kiếm theo tên học phần..." : "Tìm kiếm theo tên lớp..."}
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
@@ -395,6 +492,7 @@ function TeacherProfile() {
         disabledElement={initialArrDisabled}
         onClickCheck={handleCheckProfile}
         onChangeSelectedCheckOption={handleChangeSelectedCheckOption}
+        onClickExportExcel={handleExportExcel}
       />
       {columnTable?.length > 0 && (
         <BaseTableAdmin
@@ -405,7 +503,7 @@ function TeacherProfile() {
           setRowIdSelects={setRowIdSelects}
           rowIdSelects={rowIdSelects}
           onClickOpenFile={handleIsOpenDialogFile}
-          onClickOpenNote={handleOpenDialogNote}
+          onClickOpenNote={(idRecord: string) => handleOpenDialogNote(idRecord)}
         />
       )}
       {dataProfiles.datas && (
@@ -438,8 +536,13 @@ function TeacherProfile() {
       )}
       {isOpenDialogNote && (
         <BaseDialogNote
-          onClickHideDialog={handleOpenDialogNote}
-          onClickUpdateNode={handleUpdateNote}
+          valueNote={recordDataById}
+          onClickHideDialog={handleHideDialogNote}
+          onClickUpdateNode={(note: string) => handleUpdateNote(note)}
+          isDisabledButton={
+            dataUserContext.nhom_id === ERole.GVCN &&
+            dataUserContext.nhom_id !== ERole.ADMIN
+          }
         />
       )}
       <BaseDialogConfirm
