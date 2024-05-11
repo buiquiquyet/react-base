@@ -8,7 +8,7 @@ import {
   deleteRecord,
   deleteRecords,
   getAllRecords,
-  getListRecordByDepartmentId,
+  getListRecordByDepartmentAndUserId,
   getListRecordByUserId,
   getRecordById,
   updateCheckRecords,
@@ -43,6 +43,7 @@ import { MyContext } from "@/AppRouter";
 import BaseDialogNote from "@/layout/modal/BaseDialogNote";
 import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
 import { BuildExcel } from "@/utils/BuildExcel";
+import { getAllSubjects } from "@/redux/api/teacher/SubjectCrud";
 
 const columnRecord: any = [
   {
@@ -51,6 +52,7 @@ const columnRecord: any = [
     type: ETableColumnType.TEXT,
   },
   { label: "Học phần", accessor: "ten_hoc_phan", type: ETableColumnType.TEXT },
+  { label: "Bộ môn", accessor: "bo_mon_id", type: ETableColumnType.TEXT },
   { label: "Đợt", accessor: "ky_id", type: ETableColumnType.TEXT },
   { label: "Họ tên GV", accessor: "ten_gv", type: ETableColumnType.TEXT },
   {
@@ -98,9 +100,12 @@ function TeacherProfile() {
   const pages: Page = new Page();
   const [page, setPages] = useState(pages);
   const [isShowDialog, setIsShowDialog] = useState(false);
-  const [optionsSemester, setOptionsSemester] = useState([]);
+  const [optionSemester, setOptionSemester] = useState([]);
   const [optionClasses, setOptionClasses] = useState([]);
+  const [optionSubjects, setOptionSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedClasses, setSelectedClasses] = useState(null);
+  const [selectedSemester, setSelectedSemester] = useState(null);
   const [listFileNames, setListFileNames] = useState([]);
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
   const [isopenDialogFile, setIsOpenDialogFile] = useState(false);
@@ -110,7 +115,6 @@ function TeacherProfile() {
   const [idRecordUpdateNote, setIdRecordUpdateNote] = useState("");
   const [recordDataById, setRecordDataById] = useState();
   const [selectedCheck, setSelectedCheck] = useState(null);
-  const [selectedOptionSemester, setSelectedOptionSemester] = useState(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleShowHideDialog = () => {
     if (isShowDialog) {
@@ -121,7 +125,8 @@ function TeacherProfile() {
     if (idProfile) {
       setIdProfile("");
       setSelectedClasses(null);
-      setSelectedOptionSemester(null);
+      setSelectedSemester(null);
+      setSelectedSubject(null);
     }
     setIsShowDialog(!isShowDialog);
   };
@@ -170,10 +175,13 @@ function TeacherProfile() {
   };
 
   const handleChangeSemester = (value: any) => {
-    setSelectedOptionSemester(value);
+    setSelectedSemester(value);
   };
   const handleChangeClass = (value: any) => {
     setSelectedClasses(value);
+  };
+  const handleChangeSubject = (value: any) => {
+    setSelectedSubject(value);
   };
   const handleCancelDiaLogConfirm = () => {
     setOpenDialogConfirm(false);
@@ -257,110 +265,6 @@ function TeacherProfile() {
   const handleHideDialogNote = () => {
     setIsOpenDialogNote(false);
   };
-  const fecthDataSemester = () => {
-    getAllSemesters()
-      .then((res: any) => {
-        if (res.data.message) {
-          const newSemesters = res.data.datas.map((item: any) => {
-            return {
-              value: item.Id,
-              label: item.ten,
-            };
-          });
-          setOptionsSemester(newSemesters);
-        } else setOptionsSemester([]);
-      })
-      .catch(() => {
-        toast.error("Error", { autoClose: 1800 });
-      });
-  };
-  const fecthDataProfiles = async (page: Page) => {
-    setSelectedOptionSemester(null);
-    setListFileNames([]);
-    const rsDataProfiles: any = BuildParams.starWith(EUrlRouter.SW_TBT)
-      ? await getListRecordByDepartmentId(dataUserContext?.id_khoa, page)
-      : BuildParams.starWith(EUrlRouter.SW_ADMIN)
-      ? BuildParams.isLocation(EUrlRouter.IS_RECORD)
-        ? await getAllRecords()
-        : await getAllInstructors()
-      : BuildParams.isLocation(EUrlRouter.IS_RECORD)
-      ? await getListRecordByUserId(dataUserContext?.Id, page)
-      : await getListInstructorByUserId(dataUserContext?.Id, page);
-    if (rsDataProfiles.data.message) {
-      const arrResponse = await Promise.all(
-        rsDataProfiles.data.datas.map(async (item: any) => {
-          const fileData = await fechtCountFileByProfileId(item.Id);
-          if (fileData) {
-            return {
-              ...item,
-              countFile: fileData.countFile,
-            };
-          } else return { ...item, countFile: 0 };
-        })
-      );
-      const newSemester = [...optionsSemester];
-      const newDatas = arrResponse.map((itemProfile: any) => {
-        const name_Semester = newSemester
-          .filter(
-            (itemSemester: any) => itemProfile.ky_id === itemSemester.value
-          )
-          .map((item: any) => item.label)
-          .join("");
-        return {
-          ...itemProfile,
-          ky_id: name_Semester,
-        };
-      });
-      setDataProfiles({
-        ...rsDataProfiles.data,
-        datas: newDatas,
-      });
-    } else {
-      setDataProfiles([] as any);
-    }
-  };
-  const fechtCountFileByProfileId = async (ProfileId: any) => {
-    try {
-      const res = await getCountByProfileId(ProfileId);
-      if (res.data.message) {
-        return res.data;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error("Error fetching count:", error);
-      return false;
-    }
-  };
-  const fecthDataFileByIdProfile = async (idProfile: string) => {
-    if (idProfile) {
-      const fileData = await fechtCountFileByProfileId(idProfile);
-      if (fileData) setListFileNames(fileData.files);
-    }
-  };
-
-  const fecthDataClasses = () => {
-    getAllClasses()
-      .then((res: any) => {
-        if (res.data.message) {
-          const newDatas = res.data.datas.map((item: any) => {
-            return {
-              value: item.nhom_id,
-              label: item.nhom_id,
-              idLop: item.Id,
-            };
-          });
-          setOptionClasses(newDatas);
-        } else {
-          toast.error(res.data.error);
-          setOptionClasses([] as any);
-        }
-      })
-      .catch((error: any) => {
-        toast.error(error);
-        setOptionClasses([] as any);
-      });
-  };
 
   const handleExportExcel = () => {
     const titleColumnRecord = [
@@ -430,18 +334,154 @@ function TeacherProfile() {
       ]);
     }
   };
+  const fecthDataSemesters = () => {
+    getAllSemesters()
+      .then((res: any) => {
+        if (res.data.message) {
+          const newSemesters = res.data.datas.map((item: any) => {
+            return {
+              value: item.Id,
+              label: item.ten,
+            };
+          });
+          setOptionSemester(newSemesters);
+        } else setOptionSemester([]);
+      })
+      .catch(() => {
+        toast.error("Error", { autoClose: 1800 });
+      });
+  };
+  const fecthDataProfiles = async (page: Page) => {
+    setSelectedSubject(null)
+    setSelectedSemester(null);
+    setListFileNames([]);
+    const rsDataProfiles: any = BuildParams.starWith(EUrlRouter.SW_TBT)
+      ? await getListRecordByDepartmentAndUserId(dataUserContext?.id_khoa, dataUserContext?.Id, page)
+      : BuildParams.starWith(EUrlRouter.SW_ADMIN)
+      ? BuildParams.isLocation(EUrlRouter.IS_RECORD)
+        ? await getAllRecords()
+        : await getAllInstructors()
+      : BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? await getListRecordByUserId(dataUserContext?.Id, page)
+      : await getListInstructorByUserId(dataUserContext?.Id, page);
+    if (rsDataProfiles.data.message) {
+      const arrResponse = await Promise.all(
+        rsDataProfiles.data.datas.map(async (item: any) => {
+          const fileData = await fechtCountFileByProfileId(item.Id);
+          if (fileData) {
+            return {
+              ...item,
+              countFile: fileData.countFile,
+            };
+          } else return { ...item, countFile: 0 };
+        })
+      );
+      const newSemester = [...optionSemester];
+      const newDatas = arrResponse.map((itemProfile: any) => {
+        const name_Semesters = newSemester
+          .filter(
+            (itemSemester: any) => itemProfile.ky_id === itemSemester.value
+          )
+          .map((item: any) => item.label)
+          .join("");
+        return {
+          ...itemProfile,
+          ky_id: name_Semesters,
+        };
+      });
+      const newSubjects = [...optionSubjects];
+      const newDataSeconds = newDatas.map((itemProfile: any) => {
+        const name_Subjects = newSubjects
+          .filter(
+            (itemSubject: any) => itemProfile.bo_mon_id === itemSubject.value
+          )
+          .map((item: any) => item.label)
+          .join("");
+        return {
+          ...itemProfile,
+          bo_mon_id: name_Subjects,
+        };
+      });
+      setDataProfiles({
+        ...rsDataProfiles.data,
+        datas: newDataSeconds,
+      });
+    } else {
+      setDataProfiles([] as any);
+    }
+  };
+  const fechtCountFileByProfileId = async (ProfileId: any) => {
+    try {
+      const res = await getCountByProfileId(ProfileId);
+      if (res.data.message) {
+        return res.data;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error("Error fetching count:", error);
+      return false;
+    }
+  };
+  const fecthDataFileByIdProfile = async (idProfile: string) => {
+    if (idProfile) {
+      const fileData = await fechtCountFileByProfileId(idProfile);
+      if (fileData) setListFileNames(fileData.files);
+    }
+  };
+  const fecthDataClasses = () => {
+    getAllClasses()
+      .then((res: any) => {
+        if (res.data.message) {
+          const newDatas = res.data.datas.map((item: any) => {
+            return {
+              value: item.nhom_id,
+              label: item.nhom_id,
+              idLop: item.Id,
+            };
+          });
+          setOptionClasses(newDatas);
+        } else {
+          toast.error(res.data.error);
+          setOptionClasses([] as any);
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error);
+        setOptionClasses([] as any);
+      });
+  };
+  const fecthDataSubjects = async () => {
+    const rsSubjects = await getAllSubjects();
+    if (rsSubjects.data.message) {
+      const newSubjects = rsSubjects.data.datas.map((item: any) => {
+        return {
+          value: item.Id,
+          label: item.ten,
+        };
+      });
+      setOptionSubjects(newSubjects);
+    } else setOptionSubjects([]);
+  };
   useEffect(() => {
-    fecthDataSemester();
+    fecthDataSemesters();
     fecthDataClasses();
+    fecthDataSubjects();
   }, [page, location.pathname]);
   useEffect(() => {
     fecthDataFileByIdProfile(idProfile);
   }, [idProfile, location.pathname]);
   useEffect(() => {
-    if (optionsSemester && optionsSemester.length > 0) {
+    if (
+      dataUserContext &&
+      optionSemester &&
+      optionSubjects &&
+      optionSemester.length > 0 &&
+      optionSubjects.length > 0
+    ) {
       fecthDataProfiles(page);
     }
-  }, [optionsSemester, page, location.pathname]);
+  }, [optionSemester, optionSubjects, dataUserContext, page, location.pathname]);
   useEffect(() => {
     setDataProfiles({
       currentPage: 1,
@@ -483,7 +523,11 @@ function TeacherProfile() {
     <div className="w-100 teacher-profile">
       <ToastContainer />
       <BaseHeaderTable
-        placeholderSearch={BuildParams.isLocation(EUrlRouter.IS_RECORD) ? "Tìm kiếm theo tên học phần..." : "Tìm kiếm theo tên lớp..."}
+        placeholderSearch={
+          BuildParams.isLocation(EUrlRouter.IS_RECORD)
+            ? "Tìm kiếm theo tên học phần..."
+            : "Tìm kiếm theo tên lớp..."
+        }
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
@@ -516,16 +560,19 @@ function TeacherProfile() {
       )}
       {isShowDialog && (
         <DialogTeahcerProfileManagerment
-          optionsSemester={optionsSemester}
+          optionsSemester={optionSemester}
+          optionClasses={optionClasses}
+          optionsSubject={optionSubjects}
           onChangeSemester={(value) => handleChangeSemester(value)}
-          onClickDialog={handleShowHideDialog}
-          selectedOptionSemester={selectedOptionSemester}
+          onChangeClass={(value) => handleChangeClass(value)}
+          onChangeSubject={(value) => handleChangeSubject(value)}
           handleFecthProfiles={() => fecthDataProfiles(page)}
+          onClickDialog={handleShowHideDialog}
+          selectedSemester={selectedSemester}
+          selectedOptionSubject={selectedSubject}
+          selectedClass={selectedClasses}
           idProfile={idProfile}
           listFiles={listFileNames}
-          optionClasses={optionClasses}
-          onChangeClass={(value) => handleChangeClass(value)}
-          selectedClass={selectedClasses}
         />
       )}
       {isopenDialogFile && (

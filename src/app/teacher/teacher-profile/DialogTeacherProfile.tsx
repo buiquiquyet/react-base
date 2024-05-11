@@ -29,16 +29,19 @@ import { BuildParams } from "@/utils/BuildParams";
 import { EUrlRouter } from "@/layout/component/constances/roleUser";
 interface DialogProps {
   optionsSemester?: any;
-  selectedOptionSemester?: any;
+  optionsSubject?: any;
+  optionClasses?: any[];
+  selectedSemester?: any;
+  selectedOptionSubject?: any;
   selectedClass?: any;
   onChangeSemester: (value: any) => void;
+  onChangeSubject: (value: any) => void;
   onChangeClass: (value: any) => void;
   onClickDialog: () => void;
   handleFecthProfiles: () => void;
   typeDialog?: string;
   idProfile?: any;
   listFiles?: any[];
-  optionClasses?: any[];
 }
 
 const initialValuesRecord = {
@@ -47,6 +50,7 @@ const initialValuesRecord = {
   lop: "",
   ten_hoc_phan: "",
   ky_id: "",
+  bo_mon_id:"",
   ngay_bat_dau: "",
   ngay_ket_thuc: "",
   check: "",
@@ -59,15 +63,18 @@ const initialValuesInstructor = {
 };
 const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   optionsSemester,
-  selectedOptionSemester,
+  optionClasses,
+  optionsSubject,
+  selectedSemester,
+  selectedOptionSubject,
+  selectedClass,
   onChangeSemester,
+  onChangeSubject,
   onClickDialog,
   handleFecthProfiles,
+  onChangeClass,
   idProfile,
   listFiles,
-  optionClasses,
-  onChangeClass,
-  selectedClass,
 }) => {
   const dataUserContext: any = useContext(MyContext);
   const firstDivRecord = [
@@ -100,13 +107,22 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       value: selectedClass,
     },
   ];
-  const secondDiv = [
+  const semesterDiv = [
     {
       label: "Đợt",
       options: optionsSemester,
       placeholder: "Chọn đợt...",
       callback: onChangeSemester,
-      value: selectedOptionSemester,
+      value: selectedSemester,
+    },
+  ];
+  const subjectDiv = [
+    {
+      label: "Bộ môn",
+      options: optionsSubject,
+      placeholder: "Chọn bộ môn...",
+      callback: onChangeSubject,
+      value: selectedOptionSubject,
     },
   ];
   const thirddDiv = [
@@ -139,15 +155,18 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   const formik = useFormik({
     initialValues: dataProfile,
     enableReinitialize: true,
-    validationSchema:BuildParams.isLocation(EUrlRouter.IS_RECORD) ? DialogSchema : null,
+    validationSchema: BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? DialogSchema
+      : null,
     onSubmit: async (values) => {
       const profile = {
         ...values,
         user_id: dataUserContext.Id,
-        ky_id: selectedOptionSemester,
+        ky_id: selectedSemester,
         ten_gv: dataUserContext.hodem + " " + dataUserContext.ten,
         lop: selectedClass,
         id_khoa: dataUserContext.id_khoa,
+        bo_mon_id: selectedOptionSubject
       };
       if (idProfile) {
         const rsDelFileUploads = await deleteFileUploads();
@@ -256,6 +275,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       onChangeClass(data.lop);
       setDataProfile(data);
       onChangeSemester(data.ky_id);
+      onChangeSubject(data.bo_mon_id);
     }
   };
   const renderElementFistDiv = (
@@ -366,7 +386,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
             })}
           </div>
           <div className="d-flex gap-3  col-3 flex-column">
-            {secondDiv.map((item: any, index: any) => {
+            {subjectDiv.map((item: any, index: any) => {
               return (
                 <Fragment key={index}>
                   {renderElementSecondDiv(
@@ -389,6 +409,19 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
               })}
           </div>
           <div className="d-flex flex-column flex-1 col-3 gap-3">
+            {semesterDiv.map((item: any, index: any) => {
+              return (
+                <Fragment key={index}>
+                  {renderElementSecondDiv(
+                    item.label,
+                    item.options,
+                    item.placeholder,
+                    item.callback,
+                    item.value
+                  )}
+                </Fragment>
+              );
+            })}
             <Upload
               action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
               listType="text"

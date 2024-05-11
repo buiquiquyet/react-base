@@ -4,6 +4,7 @@ export interface TeacherModal{
     lop: string,
     ten_hoc_phan?: string,
     ky_id: string,
+    bo_mon_id?: string
     ngay_bat_dau?: string,
     ngay_ket_thuc?: string,
     ghichu?: string,
