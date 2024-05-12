@@ -11,7 +11,6 @@ import SVG from "react-inlinesvg";
 import Spinner from "@/helper/Spinner";
 import { useContext, useEffect, useState } from "react";
 import SideBarAdmin from "../../layout/component/sidebar/SideBarAdmin";
-import TeacherProfileOther from "./teacher-profile-other/TeacherProfileOther";
 import { BuildParams } from "@/utils/BuildParams";
 import TeacherProfile from "./teacher-profile/TeacherProfile";
 import { MyContext } from "@/AppRouter";
@@ -36,12 +35,7 @@ const TeacherSettingsRoutes: TeacherSettingRoute[] = [
     key: "teacher-instructor",
     element: <TeacherProfile />,
   },
-  {
-    title: "Hồ sơ khác",
-    icon: "chairman-profile",
-    key: "teacher-other",
-    element: <TeacherProfileOther />,
-  },
+  
 ];
 function TeacherSetting() {
   const location = useLocation();

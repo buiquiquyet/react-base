@@ -26,56 +26,76 @@ import {
   updateInstructor,
 } from "@/redux/api/teacher/teacherInstructor";
 import { BuildParams } from "@/utils/BuildParams";
+import { EUrlRouter } from "@/layout/component/constances/roleUser";
 interface DialogProps {
   optionsSemester?: any;
-  selectedOptionSemester?: any;
+  optionsSubject?: any;
+  optionClasses?: any[];
+  selectedSemester?: any;
+  selectedOptionSubject?: any;
   selectedClass?: any;
   onChangeSemester: (value: any) => void;
+  onChangeSubject: (value: any) => void;
   onChangeClass: (value: any) => void;
   onClickDialog: () => void;
   handleFecthProfiles: () => void;
   typeDialog?: string;
   idProfile?: any;
   listFiles?: any[];
-  optionClasses?: any[];
 }
 
-const initialValues = {
+const initialValuesRecord = {
   user_id: "",
   ten_gv: "",
   lop: "",
   ten_hoc_phan: "",
   ky_id: "",
+  bo_mon_id:"",
   ngay_bat_dau: "",
   ngay_ket_thuc: "",
   check: "",
 };
-
+const initialValuesInstructor = {
+  user_id: "",
+  ten_gv: "",
+  lop: "",
+  ky_id: "",
+};
 const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   optionsSemester,
-  selectedOptionSemester,
+  optionClasses,
+  optionsSubject,
+  selectedSemester,
+  selectedOptionSubject,
+  selectedClass,
   onChangeSemester,
+  onChangeSubject,
   onClickDialog,
   handleFecthProfiles,
+  onChangeClass,
   idProfile,
   listFiles,
-  optionClasses,
-  onChangeClass,
-  selectedClass,
 }) => {
   const dataUserContext: any = useContext(MyContext);
-  const firstDiv = [
+  const firstDivRecord = [
     {
       label: "  Họ tên ",
       type: "text",
       name: "ten_gv",
       value: dataUserContext.hodem + " " + dataUserContext.ten,
     },
-
     {
       label: "Học phần",
       type: "text",
       name: "ten_hoc_phan",
+    },
+  ];
+  const firstDivInstructor = [
+    {
+      label: "  Họ tên ",
+      type: "text",
+      name: "ten_gv",
+      value: dataUserContext.hodem + " " + dataUserContext.ten,
     },
   ];
   const classDiv = [
@@ -87,13 +107,22 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       value: selectedClass,
     },
   ];
-  const secondDiv = [
+  const semesterDiv = [
     {
       label: "Đợt",
       options: optionsSemester,
       placeholder: "Chọn đợt...",
       callback: onChangeSemester,
-      value: selectedOptionSemester,
+      value: selectedSemester,
+    },
+  ];
+  const subjectDiv = [
+    {
+      label: "Bộ môn",
+      options: optionsSubject,
+      placeholder: "Chọn bộ môn...",
+      callback: onChangeSubject,
+      value: selectedOptionSubject,
     },
   ];
   const thirddDiv = [
@@ -110,29 +139,34 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   ];
 
   const [disabledBtn, setDisabledBtn] = useState(false);
-  const [dataProfile, setDataProfile] = useState<TeacherModal>(initialValues);
+  const [dataProfile, setDataProfile] = useState<TeacherModal>(
+    BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? initialValuesRecord
+      : initialValuesInstructor
+  );
+
   const [fileList, setFileList] = useState<any>([]);
 
-  // const [dataProfileUpdate, setDataProfileUpdate] = useState<UserModal>()
   const DialogSchema = Yup.object().shape({
     ten_hoc_phan: Yup.string().required("Trường này bắt buộc nhập"),
     ngay_bat_dau: Yup.string().required("Trường này bắt buộc nhập"),
     ngay_ket_thuc: Yup.string().required("Trường này bắt buộc nhập"),
-    // ky_id: Yup.string().required("Trường này bắt buộc nhập"),
   });
-
   const formik = useFormik({
     initialValues: dataProfile,
     enableReinitialize: true,
-    validationSchema: DialogSchema,
+    validationSchema: BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? DialogSchema
+      : null,
     onSubmit: async (values) => {
       const profile = {
         ...values,
         user_id: dataUserContext.Id,
-        ky_id: selectedOptionSemester,
+        ky_id: selectedSemester,
         ten_gv: dataUserContext.hodem + " " + dataUserContext.ten,
         lop: selectedClass,
-        id_khoa: dataUserContext.id_khoa
+        id_khoa: dataUserContext.id_khoa,
+        bo_mon_id: selectedOptionSubject
       };
       if (idProfile) {
         const rsDelFileUploads = await deleteFileUploads();
@@ -141,7 +175,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
         if (!rsFileUpload && !rsDelFileUploads) {
           toast.error("Đã xảy ra lỗi.", { autoClose: 1500 });
         } else {
-          const rsUpdateProfile = BuildParams.isLocation("record")
+          const rsUpdateProfile = BuildParams.isLocation(EUrlRouter.IS_RECORD)
             ? await updateRecord(idProfile, profile)
             : await updateInstructor(idProfile, profile);
           if (rsUpdateProfile.data.message) {
@@ -156,7 +190,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
           }
         }
       } else {
-        const rsCreateProfile = BuildParams.isLocation("record")
+        const rsCreateProfile = BuildParams.isLocation(EUrlRouter.IS_RECORD)
           ? await createRecord(profile)
           : await createInstructor(profile);
         if (rsCreateProfile.data.message) {
@@ -233,7 +267,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
   };
 
   const fecthDataProfileById = async (idProfile: any) => {
-    const rsRecordById: any = BuildParams.isLocation("record")
+    const rsRecordById: any = BuildParams.isLocation(EUrlRouter.IS_RECORD)
       ? await getRecordById(idProfile)
       : await getInstructorById(idProfile);
     if (rsRecordById.data.message) {
@@ -241,6 +275,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       onChangeClass(data.lop);
       setDataProfile(data);
       onChangeSemester(data.ky_id);
+      onChangeSubject(data.bo_mon_id);
     }
   };
   const renderElementFistDiv = (
@@ -302,7 +337,18 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       </div>
     );
   };
-
+  const renderByRouterUrlProfile = () => {
+    const routerUrl = BuildParams.isLocation(EUrlRouter.IS_RECORD)
+      ? firstDivRecord
+      : firstDivInstructor;
+    return routerUrl.map((item: any, index: number) => {
+      return (
+        <Fragment key={index}>
+          {renderElementFistDiv(item.label, item.type, item.name, item.value)}
+        </Fragment>
+      );
+    });
+  };
   useEffect(() => {
     if (idProfile) {
       fecthDataProfileById(idProfile);
@@ -314,8 +360,8 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
     }
   }, [idProfile, listFiles]);
   useEffect(() => {
-    onChangeClass(dataUserContext.lop)
-  }, [])
+    onChangeClass(dataUserContext.lop);
+  }, []);
   return (
     <BaseDialog
       onClickHideDialog={onClickDialog}
@@ -324,18 +370,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
         <div className="d-flex gap-4 justify-content-between">
           <div className="col-4 d-flex flex-column gap-3">
-            {firstDiv.map((item: any, index: number) => {
-              return (
-                <Fragment key={index}>
-                  {renderElementFistDiv(
-                    item.label,
-                    item.type,
-                    item.name,
-                    item.value
-                  )}
-                </Fragment>
-              );
-            })}
+            {renderByRouterUrlProfile()}
             {classDiv.map((item: any, index: any) => {
               return (
                 <Fragment key={index}>
@@ -351,7 +386,7 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
             })}
           </div>
           <div className="d-flex gap-3  col-3 flex-column">
-            {secondDiv.map((item: any, index: any) => {
+            {subjectDiv.map((item: any, index: any) => {
               return (
                 <Fragment key={index}>
                   {renderElementSecondDiv(
@@ -364,15 +399,29 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
                 </Fragment>
               );
             })}
-            {thirddDiv.map((item: any, index: any) => {
+            {BuildParams.isLocation(EUrlRouter.IS_RECORD) &&
+              thirddDiv.map((item: any, index: any) => {
+                return (
+                  <Fragment key={index}>
+                    {renderElementFistDiv(item.label, item.type, item.name)}
+                  </Fragment>
+                );
+              })}
+          </div>
+          <div className="d-flex flex-column flex-1 col-3 gap-3">
+            {semesterDiv.map((item: any, index: any) => {
               return (
                 <Fragment key={index}>
-                  {renderElementFistDiv(item.label, item.type, item.name)}
+                  {renderElementSecondDiv(
+                    item.label,
+                    item.options,
+                    item.placeholder,
+                    item.callback,
+                    item.value
+                  )}
                 </Fragment>
               );
             })}
-          </div>
-          <div className="d-flex flex-column flex-1 col-3 gap-3">
             <Upload
               action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
               listType="text"

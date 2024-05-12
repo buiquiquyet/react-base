@@ -13,9 +13,9 @@ export function getListRecordByUserId(idUser: string, page: Page) {
   const params = BuildParams.Params(page);
   return axios.get(`${AUTH_URL}/user/${idUser}${params}`);
 }
-export function getListRecordByDepartmentId(idDepartment: string, page: Page) {
+export function getListRecordByDepartmentAndSubjectId(idDepartment: string,idSubject: string, page: Page) {
   const params = BuildParams.Params(page);
-  return axios.get(`${AUTH_URL}/department/${idDepartment}${params}`);
+  return axios.get(`${AUTH_URL}/tbt/${idDepartment}/${idSubject}${params}`);
 }
 export function getAllRecords() {
   return axios.get(`${AUTH_URL}`);
@@ -32,11 +32,17 @@ export function deleteRecord(idRecord: any) {
 export function updateRecord(idRecord: any, record: TeacherModal) {
   return axios.put(`${AUTH_URL}/${idRecord}`, record);
 }
-
+export function updateNoteRecord(idRecord: string, note: string) {
+  return axios.put(`${AUTH_URL}/note/${idRecord}`, note, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 export function updateCheckRecords(idRecords: any, valueCheck: string) {
   return axios.put(
     `${AUTH_URL}/updateChecks?updateChecks=${valueCheck}`,
-    idRecords, 
+    idRecords,
     {
       headers: {
         "Content-Type": "application/json",

@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/api/auth/authCrud";
 import BaseMessageLog from "@/layout/modal/BaseMessageLog";
 import { BuildParams } from "@/utils/BuildParams";
+import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
 const initialValues = {
   tendangnhap: "",
   password: "",
@@ -39,23 +40,29 @@ function Login() {
           if (res.data.token) {
             const token = res.data.token;
             const role = res.data.role;
-            BuildParams.setLocalStorage("token", token);
-            toast.success("Đăng nhập thành công.", {
-              autoClose: 1800,
-              onClose: () => {
-                setDisable(false);
-                navigate(
-                  role === "ADMIN"
-                    ? "/admin"
-                    : role === "GVCN"
-                    ? "/teacher"
-                    : "/tbt"
-                );
-              },
-            });
+            const newRole =
+              role === ERole.ADMIN
+                ? EUrlRouter.SW_ADMIN
+                : role === ERole.GVCN
+                ? EUrlRouter.SW_TEACHER
+                : role === ERole.TBT
+                ? EUrlRouter.SW_TBT
+                : EUrlRouter.SW_DEFAULT;
+
+            if (newRole !== EUrlRouter.SW_DEFAULT) {
+              BuildParams.setLocalStorage("token", token);
+              toast.success("Đăng nhập thành công.", {
+                autoClose: 1800,
+                onClose: () => {
+                  setDisable(false);
+                  navigate(newRole);
+                },
+              });
+            } else setErrorMessage("Tài khoản chưa được cấp quyền!");
+            setDisable(false);
           } else {
             setErrorMessage(res.data.errorMessage);
-            setDisable(false)
+            setDisable(false);
           }
         })
         .catch(() => {
@@ -106,7 +113,7 @@ function Login() {
     }, 1500);
     return () => clearTimeout(timeSpinner);
   }, []);
- 
+
   return (
     <>
       {loading ? (

@@ -9,6 +9,7 @@ import Login from "@/app/auth/Login";
 import { Suspense, createContext, lazy, useEffect, useState } from "react";
 import { validateUser } from "./redux/api/admin/userCrud";
 import { BuildParams } from "./utils/BuildParams";
+import { ERole, EUrlRouter } from "./layout/component/constances/roleUser";
 
 const Auth = lazy(() => import("./app/auth/Auth"));
 const AdminSetting = lazy(() => import("./app/admin/AdminSetting"));
@@ -17,8 +18,6 @@ const TbtSetting = lazy(() => import("./app/tbt/TbtSetting"));
 export const MyContext = createContext(null);
 function AppRouter() {
   const navigate = useNavigate();
-  // const location = useLocation();
-
   const [roleUser, setRoleUser] = useState("");
   const [dataUser, setDataUser] = useState(null);
 
@@ -27,7 +26,7 @@ function AppRouter() {
     if (token) {
       const rs = await validateUser(token);
       if (rs.data.error) {
-        navigate("/");
+        navigate(EUrlRouter.SW_DEFAULT);
         return;
       } else {
         setRoleUser(rs.data.dataUser.nhom_id);
@@ -37,7 +36,7 @@ function AppRouter() {
     }
   };
   useEffect(() => {
-    if (!BuildParams.compare("/")) {
+    if (!BuildParams.compare(EUrlRouter.SW_DEFAULT)) {
       validate();
     }
   }, [location.pathname]);
@@ -47,11 +46,13 @@ function AppRouter() {
   useEffect(() => {
     if (roleUser)
       navigate(
-        roleUser === "ADMIN"
-          ? "/admin"
-          : roleUser === "GVCN"
-          ? "/teacher"
-          : "/tbt"
+        roleUser === ERole.ADMIN
+          ? EUrlRouter.SW_ADMIN
+          : roleUser === ERole.GVCN
+          ? EUrlRouter.SW_TEACHER
+          : roleUser === ERole.TBT
+          ? EUrlRouter.SW_TBT
+          : EUrlRouter.SW_DEFAULT
       );
   }, [roleUser]);
   return (
@@ -59,15 +60,20 @@ function AppRouter() {
       <MyContext.Provider value={dataUser}>
         <Suspense>
           <Routes>
-            <Route path="/auth/*" element={<Auth />} />
-            {/* <Route path="/" element={<Navigate to={"/auth/login"} />} /> */}
+            <Route path={`${EUrlRouter.SW_AUTH}/*`} element={<Auth />} />
             <Route path="*" element={<Login />} />
-            {roleUser && roleUser === "ADMIN" ? (
-              <Route path="/admin/*" element={<AdminSetting />} />
-            ) : roleUser === "GVCN" ? (
-              <Route path="/teacher/*" element={<TeacherSetting />} />
+            {roleUser && roleUser === ERole.ADMIN ? (
+              <Route
+                path={`${EUrlRouter.SW_ADMIN}/*`}
+                element={<AdminSetting />}
+              />
+            ) : roleUser === ERole.GVCN ? (
+              <Route
+                path={`${EUrlRouter.SW_TEACHER}/*`}
+                element={<TeacherSetting />}
+              />
             ) : (
-              <Route path="/tbt/*" element={<TbtSetting />} />
+              <Route path={`${EUrlRouter.SW_TBT}/*`} element={<TbtSetting />} />
             )}
           </Routes>
         </Suspense>
