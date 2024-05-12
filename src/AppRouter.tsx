@@ -50,7 +50,9 @@ function AppRouter() {
           ? EUrlRouter.SW_ADMIN
           : roleUser === ERole.GVCN
           ? EUrlRouter.SW_TEACHER
-          : EUrlRouter.SW_TBT
+          : roleUser === ERole.TBT
+          ? EUrlRouter.SW_TBT
+          : EUrlRouter.SW_DEFAULT
       );
   }, [roleUser]);
   return (

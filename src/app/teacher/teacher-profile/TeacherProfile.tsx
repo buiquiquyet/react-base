@@ -8,7 +8,7 @@ import {
   deleteRecord,
   deleteRecords,
   getAllRecords,
-  getListRecordByDepartmentAndUserId,
+  getListRecordByDepartmentAndSubjectId,
   getListRecordByUserId,
   getRecordById,
   updateCheckRecords,
@@ -43,9 +43,10 @@ import { MyContext } from "@/AppRouter";
 import BaseDialogNote from "@/layout/modal/BaseDialogNote";
 import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
 import { BuildExcel } from "@/utils/BuildExcel";
-import { getAllSubjects } from "@/redux/api/teacher/SubjectCrud";
+import { getSubjectsByDepartmentId, getSubjectsByUserId } from "@/redux/api/teacher/SubjectCrud";
 
 const columnRecord: any = [
+  { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
     label: "Lớp",
     accessor: "lop",
@@ -72,8 +73,10 @@ const columnRecord: any = [
     accessor: "check",
     type: ETableColumnType.STATUS,
   },
+  { label: "", accessor: "", type: ETableColumnType.ICON },
 ];
 const columnInstructor: any = [
+  { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
     label: "Lớp",
     accessor: "lop",
@@ -82,6 +85,7 @@ const columnInstructor: any = [
   { label: "Đợt", accessor: "ky_id", type: ETableColumnType.TEXT },
   { label: "Họ tên GV", accessor: "ten_gv", type: ETableColumnType.TEXT },
   { label: "File", accessor: "countFile", type: ETableColumnType.FILE },
+  { label: "", accessor: "", type: ETableColumnType.ICON },
 ];
 const initArrDisabled: any = [EDisabledHeaderTableCom.DISABLED_IMPORT];
 function TeacherProfile() {
@@ -267,46 +271,48 @@ function TeacherProfile() {
   };
 
   const handleExportExcel = () => {
-    const titleColumnRecord = [
-      "Lớp",
-      "Học phần",
-      "Đợt",
-      "Họ tên GV",
-      "Ngày bắt đầu",
-      "Ngày kết thúc",
-      "Số file",
-      "Ghi chú",
-      "Trạng thái",
-    ];
-    const titleColumnInstructor = ["Lớp", "Đợt", "Họ tên GV", "Số file"];
-    const exportDataRecord = dataProfiles.datas.map((item) => [
-      item.lop,
-      item?.ten_hoc_phan,
-      item.ky_id,
-      item.ten_gv,
-      item?.ngay_bat_dau,
-      item?.ngay_ket_thuc,
-      item.countFile,
-      item?.ghichu,
-      item?.check === "0"
-        ? "Chờ duyệt"
-        : item.check === "1"
-        ? "Đã duyệt"
-        : "Không duyệt",
-    ]);
-    const exportDataInstructor = dataProfiles.datas.map((item) => [
-      item.lop,
-      item.ky_id,
-      item.ten_gv,
-      item.countFile,
-    ]);
-    const arrColumn = BuildParams.isLocation(EUrlRouter.IS_RECORD)
-      ? titleColumnRecord
-      : titleColumnInstructor;
-    const exportData = BuildParams.isLocation(EUrlRouter.IS_RECORD)
-      ? exportDataRecord
-      : exportDataInstructor;
-    BuildExcel.export(exportData, arrColumn);
+    if (dataProfiles.datas?.length > 0) {
+      const titleColumnRecord = [
+        "Lớp",
+        "Học phần",
+        "Đợt",
+        "Họ tên GV",
+        "Ngày bắt đầu",
+        "Ngày kết thúc",
+        "Số file",
+        "Ghi chú",
+        "Trạng thái",
+      ];
+      const titleColumnInstructor = ["Lớp", "Đợt", "Họ tên GV", "Số file"];
+      const exportDataRecord = dataProfiles.datas.map((item) => [
+        item.lop,
+        item?.ten_hoc_phan,
+        item.ky_id,
+        item.ten_gv,
+        item?.ngay_bat_dau,
+        item?.ngay_ket_thuc,
+        item.countFile,
+        item?.ghichu,
+        item?.check === "0"
+          ? "Chờ duyệt"
+          : item.check === "1"
+          ? "Đã duyệt"
+          : "Không duyệt",
+      ]);
+      const exportDataInstructor = dataProfiles.datas.map((item) => [
+        item.lop,
+        item.ky_id,
+        item.ten_gv,
+        item.countFile,
+      ]);
+      const arrColumn = BuildParams.isLocation(EUrlRouter.IS_RECORD)
+        ? titleColumnRecord
+        : titleColumnInstructor;
+      const exportData = BuildParams.isLocation(EUrlRouter.IS_RECORD)
+        ? exportDataRecord
+        : exportDataInstructor;
+      BuildExcel.export(exportData, arrColumn);
+    }
   };
   const checkIncludeColumn = (column: any, typeCheck: any) => {
     const isIncludes = column.some((item: any) => item.type === typeCheck);
@@ -314,24 +320,30 @@ function TeacherProfile() {
   };
   const handleSetColumnTableAddIcon = () => {
     if (
-      dataUserContext.nhom_id === ERole.GVCN &&
-      !checkIncludeColumn(columnTable, ETableColumnType.ICON)
+      BuildParams.starWith(EUrlRouter.SW_TBT_TBT) ||
+      (BuildParams.starWith(EUrlRouter.SW_ADMIN) &&
+        checkIncludeColumn(columnTable, ETableColumnType.ICON))
     ) {
-      setColumnTable((prev: any[]) => [
-        ...prev,
-        { label: "", accessor: "", type: ETableColumnType.ICON },
-      ]);
+      const ColumnTableByUrl = BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)
+        ? columnInstructor
+        : columnRecord;
+      const newColumnTable = ColumnTableByUrl.filter(
+        (item: any) => item.type !== ETableColumnType.ICON
+      );
+      setColumnTable(newColumnTable);
     }
   };
   const handleSetColumnTableAddCheckBox = () => {
-    if (
-      dataUserContext.nhom_id !== ERole.ADMIN &&
-      !checkIncludeColumn(columnTable, ETableColumnType.CHECKBOX_ACTION)
-    ) {
-      setColumnTable((prev: any[]) => [
-        { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
-        ...prev,
-      ]);
+    if (BuildParams.starWith(EUrlRouter.SW_ADMIN)) {
+      const ColumnTableByUrl = BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)
+        ? columnInstructor
+        : columnRecord;
+      const newColumnTable = ColumnTableByUrl.filter(
+        (item: any) =>
+          item.type !== ETableColumnType.CHECKBOX_ACTION &&
+          item.type !== ETableColumnType.ICON
+      );
+      setColumnTable(newColumnTable);
     }
   };
   const fecthDataSemesters = () => {
@@ -351,12 +363,24 @@ function TeacherProfile() {
         toast.error("Error", { autoClose: 1800 });
       });
   };
+  const handelFectdDataInUrl2TBT = async () => {
+    const rsSJbyUserId = await getSubjectsByUserId(dataUserContext?.tendangnhap)
+    if(rsSJbyUserId.data.data) {
+      const rsRecordByDeAndSj =  await getListRecordByDepartmentAndSubjectId(
+        dataUserContext?.id_khoa,
+        rsSJbyUserId.data.data.Id,
+        page
+      )
+      return rsRecordByDeAndSj
+    } 
+    return
+  }
   const fecthDataProfiles = async (page: Page) => {
-    setSelectedSubject(null)
+    setSelectedSubject(null);
     setSelectedSemester(null);
     setListFileNames([]);
-    const rsDataProfiles: any = BuildParams.starWith(EUrlRouter.SW_TBT)
-      ? await getListRecordByDepartmentAndUserId(dataUserContext?.id_khoa, dataUserContext?.Id, page)
+    const rsDataProfiles: any = BuildParams.starWith(EUrlRouter.SW_TBT_TBT)
+      ? await handelFectdDataInUrl2TBT()
       : BuildParams.starWith(EUrlRouter.SW_ADMIN)
       ? BuildParams.isLocation(EUrlRouter.IS_RECORD)
         ? await getAllRecords()
@@ -452,12 +476,14 @@ function TeacherProfile() {
       });
   };
   const fecthDataSubjects = async () => {
-    const rsSubjects = await getAllSubjects();
+    const rsSubjects = await getSubjectsByDepartmentId(
+      dataUserContext?.id_khoa
+    );
     if (rsSubjects.data.message) {
-      const newSubjects = rsSubjects.data.datas.map((item: any) => {
+      const newSubjects = rsSubjects.data.data?.map((item: any) => {
         return {
           value: item.Id,
-          label: item.ten,
+          label: item.ten !== "" ? item.ten : null,
         };
       });
       setOptionSubjects(newSubjects);
@@ -481,7 +507,13 @@ function TeacherProfile() {
     ) {
       fecthDataProfiles(page);
     }
-  }, [optionSemester, optionSubjects, dataUserContext, page, location.pathname]);
+  }, [
+    optionSemester,
+    optionSubjects,
+    dataUserContext,
+    page,
+    location.pathname,
+  ]);
   useEffect(() => {
     setDataProfiles({
       currentPage: 1,
@@ -491,17 +523,22 @@ function TeacherProfile() {
       totalRecords: 0,
     });
     if (dataUserContext && columnTable?.length > 0) {
-      if (BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)) {
-        setColumnTable(columnInstructor);
-      } else setColumnTable(columnRecord);
-      handleSetColumnTableAddIcon();
-      handleSetColumnTableAddCheckBox();
+      setColumnTable([]);
+      if (columnTable.length > 0) {
+        if (BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)) {
+          setColumnTable(columnInstructor);
+        } else setColumnTable(columnRecord);
+        handleSetColumnTableAddIcon();
+        handleSetColumnTableAddCheckBox();
+      }
     }
   }, [location.pathname]);
   useEffect(() => {
+    setInitialArrDisabled(initArrDisabled);
     if (
-      BuildParams.starWith(EUrlRouter.SW_TBT) ||
-      BuildParams.starWith(EUrlRouter.SW_ADMIN)
+      (BuildParams.starWith(EUrlRouter.SW_TBT) ||
+        BuildParams.starWith(EUrlRouter.SW_ADMIN)) &&
+      !BuildParams.starWith(EUrlRouter.SW_TBT_GVCN)
     ) {
       setInitialArrDisabled((prev: any) => [
         ...prev,
@@ -511,14 +548,15 @@ function TeacherProfile() {
     }
     if (
       BuildParams.starWith(EUrlRouter.SW_TEACHER) ||
-      BuildParams.starWith(EUrlRouter.SW_ADMIN)
+      BuildParams.starWith(EUrlRouter.SW_ADMIN) ||
+      BuildParams.starWith(EUrlRouter.SW_TBT_GVCN)
     ) {
       setInitialArrDisabled((prev: any) => [
         ...prev,
         EDisabledHeaderTableCom.DISABLED_CHECK,
       ]);
     }
-  }, []);
+  }, [location.pathname]);
   return (
     <div className="w-100 teacher-profile">
       <ToastContainer />

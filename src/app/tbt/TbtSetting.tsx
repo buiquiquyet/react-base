@@ -23,9 +23,21 @@ interface TbtSettingRoute {
 }
 const TbtSettingsRoutes: TbtSettingRoute[] = [
   {
-    title: "Thanh tra",
+    title: "Hồ sơ giảng dạy",
     icon: "intructor-profile",
     key: "teacher-record",
+    element: <TeacherProfile />,
+  },
+  {
+    title: "Hồ sơ chủ nhiệm",
+    icon: "chairman-profile",
+    key: "teacher-instructor",
+    element: <TeacherProfile />,
+  },
+  {
+    title: "Thanh tra",
+    icon: "intructor-profile",
+    key: "tbt-record",
     element: <TeacherProfile />,
   },
 ];

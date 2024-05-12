@@ -13,9 +13,9 @@ export function getListRecordByUserId(idUser: string, page: Page) {
   const params = BuildParams.Params(page);
   return axios.get(`${AUTH_URL}/user/${idUser}${params}`);
 }
-export function getListRecordByDepartmentAndUserId(idDepartment: string,idUser: string, page: Page) {
+export function getListRecordByDepartmentAndSubjectId(idDepartment: string,idSubject: string, page: Page) {
   const params = BuildParams.Params(page);
-  return axios.get(`${AUTH_URL}/tbt/${idDepartment}/${idUser}${params}`);
+  return axios.get(`${AUTH_URL}/tbt/${idDepartment}/${idSubject}${params}`);
 }
 export function getAllRecords() {
   return axios.get(`${AUTH_URL}`);
