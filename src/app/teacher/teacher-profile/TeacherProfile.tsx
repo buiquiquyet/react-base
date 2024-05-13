@@ -41,9 +41,14 @@ import { EDisabledHeaderTableCom } from "@/layout/component/constances/disabledH
 import { BuildParams } from "@/utils/BuildParams";
 import { MyContext } from "@/AppRouter";
 import BaseDialogNote from "@/layout/modal/BaseDialogNote";
-import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
+import { EUrlRouter } from "@/layout/component/constances/roleUser";
 import { BuildExcel } from "@/utils/BuildExcel";
-import { getSubjectsByDepartmentId, getSubjectsByUserId } from "@/redux/api/teacher/SubjectCrud";
+import {
+  getAllSubjects,
+  getSubjectsByDepartmentId,
+  getSubjectsByUserId,
+} from "@/redux/api/teacher/SubjectCrud";
+import { getAllDepartments } from "@/redux/api/admin/departmentCrud";
 
 const columnRecord: any = [
   { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -103,10 +108,12 @@ function TeacherProfile() {
   const [UserProfileCoppy, setProfileDataCoppy] = useState<any>([]);
   const pages: Page = new Page();
   const [page, setPages] = useState(pages);
+  const [dataSubjects, setDataSubjects] = useState([]);
   const [isShowDialog, setIsShowDialog] = useState(false);
   const [optionSemester, setOptionSemester] = useState([]);
   const [optionClasses, setOptionClasses] = useState([]);
   const [optionSubjects, setOptionSubjects] = useState([]);
+  const [optionDepartments, setOptionDepartments] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedClasses, setSelectedClasses] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
@@ -346,6 +353,7 @@ function TeacherProfile() {
       setColumnTable(newColumnTable);
     }
   };
+
   const fecthDataSemesters = () => {
     getAllSemesters()
       .then((res: any) => {
@@ -364,17 +372,19 @@ function TeacherProfile() {
       });
   };
   const handelFectdDataInUrl2TBT = async () => {
-    const rsSJbyUserId = await getSubjectsByUserId(dataUserContext?.tendangnhap)
-    if(rsSJbyUserId.data.data) {
-      const rsRecordByDeAndSj =  await getListRecordByDepartmentAndSubjectId(
+    const rsSJbyUserId = await getSubjectsByUserId(
+      dataUserContext?.tendangnhap
+    );
+    if (rsSJbyUserId.data.data) {
+      const rsRecordByDeAndSj = await getListRecordByDepartmentAndSubjectId(
         dataUserContext?.id_khoa,
         rsSJbyUserId.data.data.Id,
         page
-      )
-      return rsRecordByDeAndSj
-    } 
-    return
-  }
+      );
+      return rsRecordByDeAndSj;
+    }
+    return;
+  };
   const fecthDataProfiles = async (page: Page) => {
     setSelectedSubject(null);
     setSelectedSemester(null);
@@ -434,6 +444,27 @@ function TeacherProfile() {
       setDataProfiles([] as any);
     }
   };
+  const fecthDataDepartments = () => {
+    getAllDepartments()
+      .then((res: any) => {
+        if (res.data.message) {
+          const newDatas = res.data.datas.map((item: any) => {
+            return {
+              value: item.id_khoa,
+              label: item.name_khoa,
+            };
+          });
+          setOptionDepartments(newDatas);
+        } else {
+          toast.error(res.data.error);
+          setOptionDepartments([] as any);
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error);
+        setOptionDepartments([] as any);
+      });
+  };
   const fechtCountFileByProfileId = async (ProfileId: any) => {
     try {
       const res = await getCountByProfileId(ProfileId);
@@ -475,7 +506,7 @@ function TeacherProfile() {
         setOptionClasses([] as any);
       });
   };
-  const fecthDataSubjects = async () => {
+  const fecthDataSubjectsByDepartmentId = async () => {
     const rsSubjects = await getSubjectsByDepartmentId(
       dataUserContext?.id_khoa
     );
@@ -489,10 +520,26 @@ function TeacherProfile() {
       setOptionSubjects(newSubjects);
     } else setOptionSubjects([]);
   };
+  const fecthDataSubjects = async () => {
+    const rsSubjects = await getAllSubjects();
+    console.log(rsSubjects);
+    
+    if (rsSubjects.data.message) {
+      const newSubjects = rsSubjects.data.datas?.map((item: any) => {
+        return {
+          value: item.Id,
+          label: item.ten !== "" ? item.ten : null,
+        };
+      });
+      setDataSubjects(newSubjects);
+    } else setOptionSubjects([]);
+  };
   useEffect(() => {
     fecthDataSemesters();
     fecthDataClasses();
-    fecthDataSubjects();
+    fecthDataSubjectsByDepartmentId();
+    fecthDataSubjects()
+    fecthDataDepartments();
   }, [page, location.pathname]);
   useEffect(() => {
     fecthDataFileByIdProfile(idProfile);
@@ -556,6 +603,18 @@ function TeacherProfile() {
         EDisabledHeaderTableCom.DISABLED_CHECK,
       ]);
     }
+    if (BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)) {
+      setInitialArrDisabled((prev: any) => [
+        ...prev,
+        EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_DEPARTMENT,
+        EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_SUBJECT,
+      ]);
+    } else {
+      setInitialArrDisabled((prev: any) => [
+        ...prev,
+        EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_CLASS,
+      ]);
+    }
   }, [location.pathname]);
   return (
     <div className="w-100 teacher-profile">
@@ -575,6 +634,9 @@ function TeacherProfile() {
         onClickCheck={handleCheckProfile}
         onChangeSelectedCheckOption={handleChangeSelectedCheckOption}
         onClickExportExcel={handleExportExcel}
+        optionDepartment={optionDepartments}
+        optionSubject={dataSubjects}
+        optionClass={optionClasses}
       />
       {columnTable?.length > 0 && (
         <BaseTableAdmin
@@ -624,10 +686,7 @@ function TeacherProfile() {
           valueNote={recordDataById}
           onClickHideDialog={handleHideDialogNote}
           onClickUpdateNode={(note: string) => handleUpdateNote(note)}
-          isDisabledButton={
-            dataUserContext.nhom_id === ERole.GVCN &&
-            dataUserContext.nhom_id !== ERole.ADMIN
-          }
+          isDisabledButton={!BuildParams.starWith(EUrlRouter.SW_TBT_TBT)}
         />
       )}
       <BaseDialogConfirm

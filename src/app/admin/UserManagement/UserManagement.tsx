@@ -358,7 +358,12 @@ function UserManagement() {
         onClickImportExcel={(e) => handleImportExcel(e)}
         onClickExportExcel={handleExportExcel}
         onClickButtonInputFile={handleButtonClick}
-        disabledElement={[EDisabledHeaderTableCom.DISABLED_CHECK]}
+        disabledElement={[
+          EDisabledHeaderTableCom.DISABLED_CHECK,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_DEPARTMENT,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_SUBJECT,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_CLASS,
+        ]}
       />
       <BaseTableAdmin
         columns={column}

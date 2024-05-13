@@ -153,7 +153,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                             cursor: "pointer",
                             padding: row[column.accessor] === "" ? "20px" : "",
                             wordWrap: "break-word",
-                            width: "200px",
+                            width: "120px",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -170,6 +170,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           <div
                             className="status-col"
                             style={{
+                              minWidth: "120px",
                               background:
                                 row[column.accessor] === "0" ||
                                 row[column.accessor] === ""
