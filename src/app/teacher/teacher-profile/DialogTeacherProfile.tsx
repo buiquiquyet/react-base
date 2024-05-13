@@ -7,7 +7,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Fragment, useContext, useEffect, useState } from "react";
 import BaseMessageLog from "@/layout/modal/BaseMessageLog";
-import { toast } from "react-toastify";
 import { TeacherModal } from "../modal/teacherModal";
 import { Upload } from "antd";
 import SVG from "react-inlinesvg";
@@ -27,6 +26,11 @@ import {
 } from "@/redux/api/teacher/teacherInstructor";
 import { BuildParams } from "@/utils/BuildParams";
 import { EUrlRouter } from "@/layout/component/constances/roleUser";
+import {
+  ToastMessage,
+  ToastStatus,
+} from "@/layout/component/constances/toast-dialog";
+import { ErrorMessage } from "@/layout/component/constances/error-code.const";
 interface DialogProps {
   optionsSemester?: any;
   optionsSubject?: any;
@@ -50,7 +54,7 @@ const initialValuesRecord = {
   lop: "",
   ten_hoc_phan: "",
   ky_id: "",
-  bo_mon_id:"",
+  bo_mon_id: "",
   ngay_bat_dau: "",
   ngay_ket_thuc: "",
   check: "",
@@ -166,27 +170,29 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
         ten_gv: dataUserContext.hodem + " " + dataUserContext.ten,
         lop: selectedClass,
         id_khoa: dataUserContext.id_khoa,
-        bo_mon_id: selectedOptionSubject
+        bo_mon_id: selectedOptionSubject,
       };
+      
       if (idProfile) {
         const rsDelFileUploads = await deleteFileUploads();
         const newFileLists = fileList.filter((file: any) => !file.Id);
         const rsFileUpload = await createFileUpload(newFileLists, idProfile);
         if (!rsFileUpload && !rsDelFileUploads) {
-          toast.error("Đã xảy ra lỗi.", { autoClose: 1500 });
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         } else {
           const rsUpdateProfile = BuildParams.isLocation(EUrlRouter.IS_RECORD)
             ? await updateRecord(idProfile, profile)
             : await updateInstructor(idProfile, profile);
           if (rsUpdateProfile.data.message) {
             setDisabledBtn(true);
-            toast.success(rsUpdateProfile.data.message, {
-              autoClose: 1800,
-              onClose: () => {
+            ToastMessage.show(
+              ToastStatus.success,
+              rsUpdateProfile.data.message,
+              () => {
                 onClickDialog();
                 handleFecthProfiles();
-              },
-            });
+              }
+            );
           }
         }
       } else {
@@ -196,13 +202,14 @@ const DialogTeahcerProfileManagerment: React.FC<DialogProps> = ({
         if (rsCreateProfile.data.message) {
           await createFileUpload(fileList, rsCreateProfile.data.profileId);
           setDisabledBtn(true);
-          toast.success(rsCreateProfile.data.message, {
-            autoClose: 1800,
-            onClose: () => {
+          ToastMessage.show(
+            ToastStatus.success,
+            rsCreateProfile.data.message,
+            () => {
               onClickDialog();
               handleFecthProfiles();
-            },
-          });
+            }
+          );
         }
       }
     },

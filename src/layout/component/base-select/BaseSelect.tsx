@@ -7,7 +7,7 @@ interface SelectOption {
 interface Props {
   options: SelectOption[];
   placeholder?: string;
-  onChangeValue?: (value: SelectOption) => void;
+  onChangeValue?: (value: any) => void;
   className?: string;
   value?: any,
 }

@@ -13,8 +13,12 @@ import {
   getUserById,
 } from "@/redux/api/admin/userCrud";
 import { createUser } from "@/redux/api/admin/userCrud";
-import {  toast } from "react-toastify";
 import { UserModal } from "../modal/userModal";
+import {
+  ToastMessage,
+  ToastStatus,
+} from "@/layout/component/constances/toast-dialog";
+import { ErrorMessage } from "@/layout/component/constances/error-code.const";
 interface DialogProps {
   optionsCV?: any;
   optionsDe?: any;
@@ -113,7 +117,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
       // name: "lop",
     },
   ];
-  
+
   const thirdDiv = [
     { label: "Ngày sinh", type: "date", name: "ngaysinh", value: "ngaysinh" },
     { label: "Email", type: "text", name: "email", value: "email" },
@@ -132,7 +136,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
   const DialogSchema = Yup.object().shape({
     tendangnhap: Yup.string()
       .notOneOf(
-        idUser === '' ? [tdnUserCheck] : [],
+        idUser === "" ? [tdnUserCheck] : [],
         "Tên đăng nhập đã được sử dụng. Vui lòng đổi tên khác"
       )
       .required("Trường này bắt buộc nhập")
@@ -161,9 +165,9 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     //   "Số điện thoại chỉ được chứa ký tự số"
     // ),
   });
-  
+
   const formik = useFormik({
-    initialValues:  dataUser ,
+    initialValues: dataUser,
     enableReinitialize: true,
     validationSchema: DialogSchema,
     onSubmit: (values) => {
@@ -178,41 +182,29 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
         updateUser(idUser, user)
           .then((res: any) => {
             setDisabledBtn(true);
-            toast.success(res.data.message, {
-              autoClose: 1800,
-              onClose: () => {
-                onClickDialog();
-                handleFecthUser();
-              },
+            ToastMessage.show(ToastStatus.success, res.data.message, () => {
+              onClickDialog();
+              handleFecthUser();
             });
           })
-          .catch((error: any) => {
-            toast.error(error, {
-              autoClose: 1800
-            })
-          })
+          .catch(() => {
+            ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
+          });
       } else {
         createUser(user)
           .then((res: any) => {
             if (res.data.message) {
               setDisabledBtn(true);
-              toast.success(res.data.message, {
-                autoClose: 1800,
-                onClose: () => {
-                  onClickDialog();
-                  handleFecthUser();
-                },
+              ToastMessage.show(ToastStatus.success, res.data.message, () => {
+                onClickDialog();
+                handleFecthUser();
               });
             } else {
-              toast.error(res.data, {
-                autoClose: 1800,
-              });
+              ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
             }
           })
-          .catch((error: any) => {
-            toast.success(error, {
-              autoClose: 1800,
-            });
+          .catch(() => {
+            ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           });
       }
     },
@@ -243,17 +235,16 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     getUserById(idUser)
       .then((res: any) => {
         if (res.data.message) {
-          const data = res.data.data
+          const data = res.data.data;
           setDataUser(data);
-          onChangeCV(data.nhom_id)
-          onChangeDe(data.id_khoa)
-          onChangeCl(data.lop)
-          onChangRadio(data.gioitinh)
-          
+          onChangeCV(data.nhom_id);
+          onChangeDe(data.id_khoa);
+          onChangeCl(data.lop);
+          onChangRadio(data.gioitinh);
         }
       })
-      .catch((error: any) => {
-        toast.error(error, { autoClose: 1800 });
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
       });
   };
   const renderElementFistDiv = (
@@ -297,7 +288,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     options?: any,
     placeholder?: string,
     callback?: () => void,
-    value?: any,
+    value?: any
   ) => {
     return (
       <div className="dialog-item w-100">
@@ -352,7 +343,10 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
     }
   }, [idUser]);
   return (
-    <BaseDialog onClickHideDialog={onClickDialog} label= {`${idUser ? 'Chỉnh sửa' : 'Thêm mới'}`}>
+    <BaseDialog
+      onClickHideDialog={onClickDialog}
+      label={`${idUser ? "Chỉnh sửa" : "Thêm mới"}`}
+    >
       <form className="dialog-form mt-3" onSubmit={formik.handleSubmit}>
         <div className="d-flex gap-4 justify-content-between">
           <div className="col-4 d-flex flex-column gap-3">
@@ -397,7 +391,7 @@ const DialogUserManagerment: React.FC<DialogProps> = ({
                     item.options,
                     item.placeholder,
                     item.callback,
-                    item.value,
+                    item.value
                   )}
                 </Fragment>
               );

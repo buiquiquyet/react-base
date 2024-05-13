@@ -8,8 +8,8 @@ export function getAllSubjects() {
 export function getSubjectById(subjectId: string) {
   return axios.get(`${AUTH_URL}/${subjectId}`);
 }
-export function getSubjectsByUserId(userId: string) {
-  return axios.get(`${AUTH_URL}/user/${userId}`);
+export function getSubjectsByUserTdn(userTdn: string) {
+  return axios.get(`${AUTH_URL}/user/${userTdn}`);
 }
 export function getSubjectsByDepartmentId(departmentId: string) {
   return axios.get(`${AUTH_URL}/department/${departmentId}`);

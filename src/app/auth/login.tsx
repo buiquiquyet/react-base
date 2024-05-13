@@ -6,12 +6,20 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import Spinner from "@/helper/Spinner";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/api/auth/authCrud";
 import BaseMessageLog from "@/layout/modal/BaseMessageLog";
 import { BuildParams } from "@/utils/BuildParams";
 import { ERole, EUrlRouter } from "@/layout/component/constances/roleUser";
+import {
+  ToastMessage,
+  ToastStatus,
+} from "@/layout/component/constances/toast-dialog";
+import {
+  ErrorMessage,
+  SuccessMessage,
+} from "@/layout/component/constances/error-code.const";
 const initialValues = {
   tendangnhap: "",
   password: "",
@@ -51,14 +59,15 @@ function Login() {
 
             if (newRole !== EUrlRouter.SW_DEFAULT) {
               BuildParams.setLocalStorage("token", token);
-              toast.success("Đăng nhập thành công.", {
-                autoClose: 1800,
-                onClose: () => {
+              ToastMessage.show(
+                ToastStatus.success,
+                SuccessMessage.SUC_RESPONSE_LOGIN,
+                () => {
                   setDisable(false);
                   navigate(newRole);
-                },
-              });
-            } else setErrorMessage("Tài khoản chưa được cấp quyền!");
+                }
+              );
+            } else setErrorMessage(ErrorMessage.ERR_LOGIN);
             setDisable(false);
           } else {
             setErrorMessage(res.data.errorMessage);
@@ -67,9 +76,7 @@ function Login() {
         })
         .catch(() => {
           setDisable(false);
-          toast.error("Đăng nhập không thành công.", {
-            autoClose: 1800,
-          });
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API)
         });
     },
     validate: (values) => {

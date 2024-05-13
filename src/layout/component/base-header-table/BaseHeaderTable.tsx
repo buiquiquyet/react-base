@@ -164,7 +164,7 @@ const BaseHeaderTable: React.FC<Props> = ({
             style={{ margin: "0px 20px" }}
           >
             <BaseSelect
-              onChangeValue={onChangeSelectedSubjectOption}
+              onChangeValue={(value: string) => onChangeSelectedSubjectOption?.(value)}
               options={optionSubject}
               placeholder="Chọn bộ môn..."
             />

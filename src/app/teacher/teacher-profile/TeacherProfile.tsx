@@ -26,7 +26,7 @@ import { BuildSearch } from "@/utils/BuildSearch";
 import { Page } from "@/utils/Page";
 import { debounce } from "lodash";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import DialogTeahcerProfileManagerment from "./DialogTeacherProfile";
 import "./../styles/TeacherProfile.scss";
 import { getAllSemesters } from "@/redux/api/teacher/SemesterCrud";
@@ -46,9 +46,14 @@ import { BuildExcel } from "@/utils/BuildExcel";
 import {
   getAllSubjects,
   getSubjectsByDepartmentId,
-  getSubjectsByUserId,
+  getSubjectsByUserTdn,
 } from "@/redux/api/teacher/SubjectCrud";
 import { getAllDepartments } from "@/redux/api/admin/departmentCrud";
+import { ErrorMessage } from "@/layout/component/constances/error-code.const";
+import {
+  ToastMessage,
+  ToastStatus,
+} from "@/layout/component/constances/toast-dialog";
 
 const columnRecord: any = [
   { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -105,7 +110,7 @@ function TeacherProfile() {
 
   const [columnTable, setColumnTable] = useState<any>(columnRecord);
   const [initialArrDisabled, setInitialArrDisabled] = useState(initArrDisabled);
-  const [UserProfileCoppy, setProfileDataCoppy] = useState<any>([]);
+  const [ProfileCoppy, setProfileDataCoppy] = useState<any>([]);
   const pages: Page = new Page();
   const [page, setPages] = useState(pages);
   const [dataSubjects, setDataSubjects] = useState([]);
@@ -161,28 +166,36 @@ function TeacherProfile() {
     });
     setProfileDataCoppy([]);
   };
-  const handleDebouncedSearch = debounce((value: string) => {
+  const handleDebouncedSearch = debounce((value: string, fieldName: any[]) => {
+    
     if (value) {
-      if (UserProfileCoppy?.length > 0) {
+      console.log(ProfileCoppy);
+      if (ProfileCoppy?.length > 0) {
+        
         const newDataUser = BuildSearch.search(
-          ["ten_hoc_phan"],
-          UserProfileCoppy,
+          fieldName,
+          ProfileCoppy,
           value
         );
+        console.log(newDataUser);
+        
         if (newDataUser.length > 0)
           setDataProfiles({ ...dataProfiles, datas: newDataUser });
         else setDataProfiles({ ...dataProfiles, datas: [] });
       }
     } else {
-      setDataProfiles({ ...dataProfiles, datas: UserProfileCoppy });
+      setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
     }
   }, 1000);
-  const handleChangeInputSearch = (value: any) => {
-    const values = value.target.value;
-    if (UserProfileCoppy?.length === 0) {
+  
+  const handleChangeSearch = (value: any, fieldName: any[]) => {
+    const values = value.target?.value  || value;
+    console.log(ProfileCoppy);
+    
+    if (ProfileCoppy?.length === 0) {
       setProfileDataCoppy(dataProfiles.datas);
     }
-    handleDebouncedSearch(values);
+    handleDebouncedSearch(values, fieldName);
   };
 
   const handleChangeSemester = (value: any) => {
@@ -192,6 +205,8 @@ function TeacherProfile() {
     setSelectedClasses(value);
   };
   const handleChangeSubject = (value: any) => {
+    console.log(value);
+    
     setSelectedSubject(value);
   };
   const handleCancelDiaLogConfirm = () => {
@@ -209,17 +224,12 @@ function TeacherProfile() {
     await deleteFileByProfileIds(idProfile ? [idProfile] : rowIdSelects);
     if (rs.data.message) {
       !idProfile && setRowIdSelects([]);
-      toast.success(rs.data.message, {
-        autoClose: 1500,
-        onClose: () => {
-          fecthDataProfiles(page);
-          setIdProfile("");
-        },
+      ToastMessage.show(ToastStatus.error, rs.data.message, () => {
+        fecthDataProfiles(page);
+        setIdProfile("");
       });
     } else {
-      toast.success("Đã xảy ra lỗi", {
-        autoClose: 1500,
-      });
+      ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
     }
   };
   const handleIsOpenDialogFile = (idProfile: string) => {
@@ -242,25 +252,24 @@ function TeacherProfile() {
       );
       if (rsCheckProfile.data.message) {
         setRowIdSelects([]);
-        toast.success(rsCheckProfile.data.message, {
-          autoClose: 1800,
-          onClose: () => {
-            fecthDataProfiles(page);
-          },
-        });
+
+        ToastMessage.show(
+          ToastStatus.success,
+          rsCheckProfile.data.message,
+          () => fecthDataProfiles(page)
+        );
       }
-    } else toast.error("Chưa chọn trạng thái duyệt!", { autoClose: 1500 });
+    } else ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_STATUS_CHECK);
   };
   const handleUpdateNote = async (note: string) => {
     const rsUpdateNote = await updateNoteRecord(idRecordUpdateNote, note);
     if (rsUpdateNote.data.message) {
       setIsOpenDialogNote(!isOpenDialogNote);
-      toast.success(rsUpdateNote.data.message, {
-        autoClose: 1800,
-        onClose: () => fecthDataProfiles(page),
+      ToastMessage.show(ToastStatus.success, rsUpdateNote.data.message, () => {
+        fecthDataProfiles(page);
       });
     } else {
-      toast.error("Đã xảy ra lỗi thêm ghi chú!", { autoClose: 1500 });
+      ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
     }
   };
   const handleOpenDialogNote = async (idRecord: string) => {
@@ -268,7 +277,7 @@ function TeacherProfile() {
     if (rsGetRecordById.data.message) {
       setRecordDataById(rsGetRecordById.data.data);
     } else {
-      toast.error("Đã xảy ra lỗi lấy dữ liệu!", { autoClose: 1500 });
+      ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
     }
     setIdRecordUpdateNote(idRecord);
     setIsOpenDialogNote(!isOpenDialogNote);
@@ -353,7 +362,7 @@ function TeacherProfile() {
       setColumnTable(newColumnTable);
     }
   };
-
+  
   const fecthDataSemesters = () => {
     getAllSemesters()
       .then((res: any) => {
@@ -368,11 +377,11 @@ function TeacherProfile() {
         } else setOptionSemester([]);
       })
       .catch(() => {
-        toast.error("Error", { autoClose: 1800 });
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
       });
   };
   const handelFectdDataInUrl2TBT = async () => {
-    const rsSJbyUserId = await getSubjectsByUserId(
+    const rsSJbyUserId = await getSubjectsByUserTdn(
       dataUserContext?.tendangnhap
     );
     if (rsSJbyUserId.data.data) {
@@ -385,6 +394,7 @@ function TeacherProfile() {
     }
     return;
   };
+
   const fecthDataProfiles = async (page: Page) => {
     setSelectedSubject(null);
     setSelectedSemester(null);
@@ -456,12 +466,12 @@ function TeacherProfile() {
           });
           setOptionDepartments(newDatas);
         } else {
-          toast.error(res.data.error);
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           setOptionDepartments([] as any);
         }
       })
-      .catch((error: any) => {
-        toast.error(error);
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         setOptionDepartments([] as any);
       });
   };
@@ -474,7 +484,7 @@ function TeacherProfile() {
         return false;
       }
     } catch (error) {
-      console.error("Error fetching count:", error);
+      ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
       return false;
     }
   };
@@ -497,19 +507,21 @@ function TeacherProfile() {
           });
           setOptionClasses(newDatas);
         } else {
-          toast.error(res.data.error);
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           setOptionClasses([] as any);
         }
       })
-      .catch((error: any) => {
-        toast.error(error);
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         setOptionClasses([] as any);
       });
   };
-  const fecthDataSubjectsByDepartmentId = async () => {
-    const rsSubjects = await getSubjectsByDepartmentId(
-      dataUserContext?.id_khoa
-    );
+  const handleFetchSubjectByDepartmentId = async (idKhoa: string) => {
+    const rs = await fecthDataSubjectsByDepartmentId(idKhoa);
+    if(rs) setDataSubjects(rs)
+  };
+  const fecthDataSubjectsByDepartmentId = async (idKhoa: string) => {
+    const rsSubjects = await getSubjectsByDepartmentId(idKhoa);
     if (rsSubjects.data.message) {
       const newSubjects = rsSubjects.data.data?.map((item: any) => {
         return {
@@ -517,29 +529,36 @@ function TeacherProfile() {
           label: item.ten !== "" ? item.ten : null,
         };
       });
-      setOptionSubjects(newSubjects);
-    } else setOptionSubjects([]);
+      return newSubjects;
+    } else return false;
   };
   const fecthDataSubjects = async () => {
     const rsSubjects = await getAllSubjects();
-    console.log(rsSubjects);
-    
     if (rsSubjects.data.message) {
       const newSubjects = rsSubjects.data.datas?.map((item: any) => {
         return {
-          value: item.Id,
+          value: item.ten,
           label: item.ten !== "" ? item.ten : null,
         };
       });
       setDataSubjects(newSubjects);
-    } else setOptionSubjects([]);
+    } else setDataSubjects([]);
   };
   useEffect(() => {
-    fecthDataSemesters();
-    fecthDataClasses();
-    fecthDataSubjectsByDepartmentId();
-    fecthDataSubjects()
-    fecthDataDepartments();
+    const fecthAlls = async () => {
+      await Promise.all([
+        fecthDataSemesters(),
+        fecthDataClasses(),
+        fecthDataSubjects(),
+        fecthDataDepartments(),
+      ]);
+      const rs = await fecthDataSubjectsByDepartmentId(
+        dataUserContext?.id_khoa
+      );
+      if (rs) setOptionSubjects(rs);
+      else setOptionSubjects([]);
+    };
+    fecthAlls();
   }, [page, location.pathname]);
   useEffect(() => {
     fecthDataFileByIdProfile(idProfile);
@@ -628,7 +647,7 @@ function TeacherProfile() {
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
-        onClickChangeInputSearch={(value) => handleChangeInputSearch(value)}
+        onClickChangeInputSearch={(value) => handleChangeSearch(value, ["ten_hoc_phan"])}
         fileInputRef={fileInputRef}
         disabledElement={initialArrDisabled}
         onClickCheck={handleCheckProfile}
@@ -637,6 +656,8 @@ function TeacherProfile() {
         optionDepartment={optionDepartments}
         optionSubject={dataSubjects}
         optionClass={optionClasses}
+        onChangeSelectedDepartmentOption={handleFetchSubjectByDepartmentId}
+        onChangeSelectedSubjectOption={(value) => handleChangeSearch(value, ["bo_mon_id"])}
       />
       {columnTable?.length > 0 && (
         <BaseTableAdmin
