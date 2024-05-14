@@ -111,6 +111,7 @@ function TeacherProfile() {
   const [columnTable, setColumnTable] = useState<any>(columnRecord);
   const [initialArrDisabled, setInitialArrDisabled] = useState(initArrDisabled);
   const [ProfileCoppy, setProfileDataCoppy] = useState<any>([]);
+  const [ProfileCoppyToSearch, setProfileCoppyToSearch] = useState<any>([]);
   const pages: Page = new Page();
   const [page, setPages] = useState(pages);
   const [dataSubjects, setDataSubjects] = useState([]);
@@ -118,7 +119,7 @@ function TeacherProfile() {
   const [optionSemester, setOptionSemester] = useState([]);
   const [optionClasses, setOptionClasses] = useState([]);
   const [optionSubjects, setOptionSubjects] = useState([]);
-  const [optionDepartments, setOptionDepartments] = useState([]);
+  const [optionDepartments, setOptionDepartments] = useState<any>([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedClasses, setSelectedClasses] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
@@ -149,6 +150,7 @@ function TeacherProfile() {
   const handleShowDialogDel = () => {
     setOpenDialogConfirm(true);
   };
+
   const handleShowSetting = (key: any, id: any) => {
     if (id) {
       setIdProfile(id);
@@ -166,36 +168,40 @@ function TeacherProfile() {
     });
     setProfileDataCoppy([]);
   };
-  const handleDebouncedSearch = debounce((value: string, fieldName: any[]) => {
-    
-    if (value) {
-      console.log(ProfileCoppy);
-      if (ProfileCoppy?.length > 0) {
-        
-        const newDataUser = BuildSearch.search(
-          fieldName,
-          ProfileCoppy,
-          value
-        );
-        console.log(newDataUser);
-        
-        if (newDataUser.length > 0)
-          setDataProfiles({ ...dataProfiles, datas: newDataUser });
-        else setDataProfiles({ ...dataProfiles, datas: [] });
+  const handleDebouncedSearch = debounce(
+    (value: string, fieldName: any[], threshold: number) => {
+      if (value) {
+        if (ProfileCoppy?.length > 0) {
+          const newDataUser = BuildSearch.Search(
+            fieldName,
+            ProfileCoppyToSearch,
+            value,
+            threshold
+          );
+          if (newDataUser.length > 0) {
+            const coppyData = [...ProfileCoppy];
+            const newArr = BuildParams.commonItemsOf2Arr(
+              coppyData,
+              newDataUser
+            );
+            setDataProfiles({ ...dataProfiles, datas: newArr });
+          } else setDataProfiles({ ...dataProfiles, datas: [] });
+        }
+      } else {
+        setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
       }
-    } else {
-      setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
-    }
-  }, 1000);
-  
-  const handleChangeSearch = (value: any, fieldName: any[]) => {
-    const values = value.target?.value  || value;
-    console.log(ProfileCoppy);
-    
-    if (ProfileCoppy?.length === 0) {
-      setProfileDataCoppy(dataProfiles.datas);
-    }
-    handleDebouncedSearch(values, fieldName);
+    },
+    1000
+  );
+  const handleChangeSearch = (
+    value: any,
+    fieldName: any[],
+    threshold: number
+  ) => {
+    // if (ProfileCoppy?.length === 0) {
+    //   setProfileDataCoppy(dataProfiles.datas);
+    // }
+    handleDebouncedSearch(value, fieldName, threshold);
   };
 
   const handleChangeSemester = (value: any) => {
@@ -205,8 +211,6 @@ function TeacherProfile() {
     setSelectedClasses(value);
   };
   const handleChangeSubject = (value: any) => {
-    console.log(value);
-    
     setSelectedSubject(value);
   };
   const handleCancelDiaLogConfirm = () => {
@@ -362,7 +366,7 @@ function TeacherProfile() {
       setColumnTable(newColumnTable);
     }
   };
-  
+
   const fecthDataSemesters = () => {
     getAllSemesters()
       .then((res: any) => {
@@ -433,7 +437,8 @@ function TeacherProfile() {
           ky_id: name_Semesters,
         };
       });
-      const newSubjects = [...optionSubjects];
+      setProfileCoppyToSearch(newDatas);
+      const newSubjects = [...dataSubjects];
       const newDataSeconds = newDatas.map((itemProfile: any) => {
         const name_Subjects = newSubjects
           .filter(
@@ -446,6 +451,7 @@ function TeacherProfile() {
           bo_mon_id: name_Subjects,
         };
       });
+      setProfileDataCoppy(newDataSeconds);
       setDataProfiles({
         ...rsDataProfiles.data,
         datas: newDataSeconds,
@@ -518,7 +524,7 @@ function TeacherProfile() {
   };
   const handleFetchSubjectByDepartmentId = async (idKhoa: string) => {
     const rs = await fecthDataSubjectsByDepartmentId(idKhoa);
-    if(rs) setDataSubjects(rs)
+    if (rs) setDataSubjects(rs);
   };
   const fecthDataSubjectsByDepartmentId = async (idKhoa: string) => {
     const rsSubjects = await getSubjectsByDepartmentId(idKhoa);
@@ -537,7 +543,7 @@ function TeacherProfile() {
     if (rsSubjects.data.message) {
       const newSubjects = rsSubjects.data.datas?.map((item: any) => {
         return {
-          value: item.ten,
+          value: item.Id,
           label: item.ten !== "" ? item.ten : null,
         };
       });
@@ -613,6 +619,15 @@ function TeacherProfile() {
       ]);
     }
     if (
+      BuildParams.starWith(EUrlRouter.SW_ADMIN) &&
+      BuildParams.isLocation(EUrlRouter.IS_INSTRUCTOR)
+    ) {
+      setInitialArrDisabled((prev: any) => [
+        ...prev,
+        EDisabledHeaderTableCom.DISABLED_SEARCH,
+      ]);
+    }
+    if (
       BuildParams.starWith(EUrlRouter.SW_TEACHER) ||
       BuildParams.starWith(EUrlRouter.SW_ADMIN) ||
       BuildParams.starWith(EUrlRouter.SW_TBT_GVCN)
@@ -632,6 +647,7 @@ function TeacherProfile() {
       setInitialArrDisabled((prev: any) => [
         ...prev,
         EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_CLASS,
+        EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_DEPARTMENT,
       ]);
     }
   }, [location.pathname]);
@@ -647,7 +663,9 @@ function TeacherProfile() {
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
-        onClickChangeInputSearch={(value) => handleChangeSearch(value, ["ten_hoc_phan"])}
+        onClickChangeInputSearch={(value) =>
+          handleChangeSearch(value.target.value, ["ten_hoc_phan"], 0.5)
+        }
         fileInputRef={fileInputRef}
         disabledElement={initialArrDisabled}
         onClickCheck={handleCheckProfile}
@@ -657,7 +675,12 @@ function TeacherProfile() {
         optionSubject={dataSubjects}
         optionClass={optionClasses}
         onChangeSelectedDepartmentOption={handleFetchSubjectByDepartmentId}
-        onChangeSelectedSubjectOption={(value) => handleChangeSearch(value, ["bo_mon_id"])}
+        onChangeSelectedSubjectOption={(value) =>
+          handleChangeSearch(value, ["bo_mon_id"], 0)
+        }
+        onChangeSelectedClassOption={(value) =>
+          handleChangeSearch(value, ["lop"], 0)
+        }
       />
       {columnTable?.length > 0 && (
         <BaseTableAdmin

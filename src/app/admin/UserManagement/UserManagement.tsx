@@ -247,13 +247,14 @@ function UserManagement() {
   const handleShowDialogDel = () => {
     setOpenDialogConfirm(true);
   };
-  const handleDebouncedSearch = debounce((value: string) => {
+  const handleDebouncedSearch = debounce((value: string,fieldName: any[], threshold: number) => {
     if (value) {
       if (UserDataCoppy.length > 0) {
-        const newDataUser = BuildSearch.search(
-          ["hodem", "ten"],
+        const newDataUser = BuildSearch.Search(
+          fieldName,
           UserDataCoppy,
-          value
+          value,
+          threshold
         );
         if (newDataUser.length > 0)
           setDataUsers({ ...dataUsers, datas: newDataUser });
@@ -263,12 +264,12 @@ function UserManagement() {
       setDataUsers({ ...dataUsers, datas: UserDataCoppy });
     }
   }, 1000);
-  const handleChangeSearch = (value: any) => {
+  const handleChangeSearch = (value: any, fieldName: any[], threshold: number) => {
     const values = value.target.value;
     if (UserDataCoppy.length === 0) {
       setUserDataCoppy(dataUsers.datas);
     }
-    handleDebouncedSearch(values);
+    handleDebouncedSearch(values,fieldName, threshold);
   };
   const handleExportExcel = () => {
     const titleColumn = [
@@ -352,7 +353,7 @@ function UserManagement() {
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
-        onClickChangeInputSearch={(value) => handleChangeSearch(value)}
+        onClickChangeInputSearch={(value) => handleChangeSearch(value,  ["hodem", "ten"], 0.5)}
         fileInputRef={fileInputRef}
         onClickImportExcel={(e) => handleImportExcel(e)}
         onClickExportExcel={handleExportExcel}
