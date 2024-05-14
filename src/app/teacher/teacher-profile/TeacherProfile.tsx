@@ -265,6 +265,7 @@ function TeacherProfile() {
       }
     } else ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_STATUS_CHECK);
   };
+  
   const handleUpdateNote = async (note: string) => {
     const rsUpdateNote = await updateNoteRecord(idRecordUpdateNote, note);
     if (rsUpdateNote.data.message) {
@@ -573,9 +574,7 @@ function TeacherProfile() {
     if (
       dataUserContext &&
       optionSemester &&
-      optionSubjects &&
-      optionSemester.length > 0 &&
-      optionSubjects.length > 0
+      optionSemester.length > 0 
     ) {
       fecthDataProfiles(page);
     }
