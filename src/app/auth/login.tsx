@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Spinner from "@/helper/Spinner";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { login } from "@/redux/api/auth/authCrud";
@@ -270,7 +270,7 @@ function Login() {
                     ) : null}
                   </div>
 
-                  <div className="d-flex justify-content-between align-items-center">
+                  {/* <div className="d-flex justify-content-between align-items-center">
                     <div className="form-check mb-0">
                       <input
                         className="form-check-input me-2"
@@ -291,7 +291,7 @@ function Login() {
                     >
                       Quên mật khẩu?
                     </Link>
-                  </div>
+                  </div> */}
 
                   <div className="text-center text-lg-start mt-4 pt-2">
                     <button
