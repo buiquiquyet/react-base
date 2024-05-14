@@ -6,7 +6,7 @@ import {
   deleteUsers,
   createManyUsers,
 } from "@/redux/api/admin/userCrud";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { Page } from "@/utils/Page";
 import BasePagination from "@/layout/component/base-pagination/BasePagination";
 import { ETableColumnType } from "@/layout/component/constances/table.const";
@@ -23,6 +23,11 @@ import BaseHeaderTable from "@/layout/component/base-header-table/BaseHeaderTabl
 import { ApiResponse } from "@/layout/component/constances/api-response";
 import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
 import { EDisabledHeaderTableCom } from "@/layout/component/constances/disabledHeaderTable";
+import { ErrorMessage } from "@/layout/component/constances/error-code.const";
+import {
+  ToastMessage,
+  ToastStatus,
+} from "@/layout/component/constances/toast-dialog";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -83,17 +88,12 @@ function UserManagement() {
       : await deleteUsers(rowIdSelects);
     if (rs.data.message) {
       !idUser && setRowIdSelects([]);
-      toast.success(rs.data.message, {
-        autoClose: 1500,
-        onClose: () => {
-          fecthDataUsers(page);
-          setIdUser("");
-        },
+      ToastMessage.show(ToastStatus.success, rs.data.message, () => {
+        fecthDataUsers(page);
+        setIdUser("");
       });
     } else {
-      toast.success("Đã xảy ra lỗi", {
-        autoClose: 1500,
-      });
+      ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
     }
   };
   const handleChangeRadio = (event: any | string) => {
@@ -130,12 +130,12 @@ function UserManagement() {
             datas: newDatas,
           });
         } else {
-          toast.error(res.data.error);
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           setDataUsers([] as any);
         }
       })
-      .catch((error: any) => {
-        toast.error(error);
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         setDataUsers([] as any);
       });
   };
@@ -153,12 +153,12 @@ function UserManagement() {
           });
           setDataClasses(newDatas);
         } else {
-          toast.error(res.data.error);
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           setDataClasses([] as any);
         }
       })
-      .catch((error: any) => {
-        toast.error(error);
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         setDataClasses([] as any);
       });
   };
@@ -175,12 +175,12 @@ function UserManagement() {
           });
           setDataDepartment(newDatas);
         } else {
-          toast.error(res.data.error);
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
           setDataDepartment([] as any);
         }
       })
-      .catch((error: any) => {
-        toast.error(error);
+      .catch(() => {
+        ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         setDataDepartment([] as any);
       });
   };
@@ -205,7 +205,7 @@ function UserManagement() {
           }
         })
         .catch(() => {
-          toast.error("Đã xảy ra lỗi");
+          ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_RESPONSE_API);
         });
     }
   };
@@ -247,13 +247,14 @@ function UserManagement() {
   const handleShowDialogDel = () => {
     setOpenDialogConfirm(true);
   };
-  const handleDebouncedSearch = debounce((value: string) => {
+  const handleDebouncedSearch = debounce((value: string,fieldName: any[], threshold: number) => {
     if (value) {
       if (UserDataCoppy.length > 0) {
-        const newDataUser = BuildSearch.search(
-          ["hodem", "ten"],
+        const newDataUser = BuildSearch.Search(
+          fieldName,
           UserDataCoppy,
-          value
+          value,
+          threshold
         );
         if (newDataUser.length > 0)
           setDataUsers({ ...dataUsers, datas: newDataUser });
@@ -263,12 +264,12 @@ function UserManagement() {
       setDataUsers({ ...dataUsers, datas: UserDataCoppy });
     }
   }, 1000);
-  const handleChangeInputSearch = (value: any) => {
+  const handleChangeSearch = (value: any, fieldName: any[], threshold: number) => {
     const values = value.target.value;
     if (UserDataCoppy.length === 0) {
       setUserDataCoppy(dataUsers.datas);
     }
-    handleDebouncedSearch(values);
+    handleDebouncedSearch(values,fieldName, threshold);
   };
   const handleExportExcel = () => {
     const titleColumn = [
@@ -320,14 +321,13 @@ function UserManagement() {
       if (formattedData) {
         const res: any = await createManyUsers(formattedData);
         if (res.data.message) {
-          toast.success(res.data.message, {
-            autoClose: 1800,
-            onClose: () => fecthDataUsers(page),
+          ToastMessage.show(ToastStatus.success, res.data.message, () => {
+            fecthDataUsers(page);
           });
         }
       }
     } catch (error) {
-      toast.error("Đã xảy ra lỗi", { autoClose: 1800 });
+      ToastMessage.show(ToastStatus.success, ErrorMessage.ERR_RESPONSE_API);
     }
   };
   const handleButtonClick = () => {
@@ -353,12 +353,17 @@ function UserManagement() {
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
-        onClickChangeInputSearch={(value) => handleChangeInputSearch(value)}
+        onClickChangeInputSearch={(value) => handleChangeSearch(value,  ["hodem", "ten"], 0.5)}
         fileInputRef={fileInputRef}
         onClickImportExcel={(e) => handleImportExcel(e)}
         onClickExportExcel={handleExportExcel}
         onClickButtonInputFile={handleButtonClick}
-        disabledElement={[EDisabledHeaderTableCom.DISABLED_CHECK]}
+        disabledElement={[
+          EDisabledHeaderTableCom.DISABLED_CHECK,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_DEPARTMENT,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_SUBJECT,
+          EDisabledHeaderTableCom.DISABLED_SEARCH_SELECT_CLASS,
+        ]}
       />
       <BaseTableAdmin
         columns={column}

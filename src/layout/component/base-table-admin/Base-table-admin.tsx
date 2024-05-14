@@ -103,7 +103,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
               data?.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column, colIndex) => (
-                    <TableCell 
+                    <TableCell
                       key={colIndex}
                       style={{
                         borderRight: "1px solid #ddd",
@@ -153,14 +153,16 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                             cursor: "pointer",
                             padding: row[column.accessor] === "" ? "20px" : "",
                             wordWrap: "break-word",
-                            width: "200px",
+                            width: "120px",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            paddingBlock:"20px"
+                            paddingBlock: "20px",
                           }}
                           onClick={() => {
-                            onClickOpenNote?.(row.Id);
+                            row[column.accessor]
+                              ? onClickOpenNote?.(row.Id)
+                              : null;
                           }}
                         >
                           {row[column.accessor]}{" "}
@@ -170,6 +172,7 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                           <div
                             className="status-col"
                             style={{
+                              minWidth: "120px",
                               background:
                                 row[column.accessor] === "0" ||
                                 row[column.accessor] === ""

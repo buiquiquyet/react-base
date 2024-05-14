@@ -27,4 +27,11 @@ export class BuildParams {
     public static compare(pathName: string) {
         return location.pathname === (pathName)
     }
+    public static commonItemsOf2Arr(originalArray: any[], arr2: any[]) {
+        const newArr = originalArray.filter((item1: any) => 
+                arr2.some((item2: any) => item1.Id === item2.Id)
+        )
+        return newArr
+        
+    }
 }

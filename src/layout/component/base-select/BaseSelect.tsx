@@ -7,7 +7,7 @@ interface SelectOption {
 interface Props {
   options: SelectOption[];
   placeholder?: string;
-  onChangeValue?: (value: SelectOption) => void;
+  onChangeValue?: (value: any) => void;
   className?: string;
   value?: any,
 }
@@ -23,7 +23,7 @@ const BaseSelect: React.FC<Props> = ({
   return (
     <Select
       className={className}
-      showSearch={options.length > 8}
+      showSearch={options?.length > 8}
       style={{ width: 200 }}
       placeholder={placeholder}
       optionFilterProp="children"
@@ -33,7 +33,7 @@ const BaseSelect: React.FC<Props> = ({
         option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
       }
     >
-      {options.map((option) => (
+      {options?.map((option) => (
         <Option key={option.value} value={option.value}>
           {option.label}
         </Option>
