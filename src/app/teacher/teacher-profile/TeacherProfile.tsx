@@ -228,7 +228,7 @@ function TeacherProfile() {
     await deleteFileByProfileIds(idProfile ? [idProfile] : rowIdSelects);
     if (rs.data.message) {
       !idProfile && setRowIdSelects([]);
-      ToastMessage.show(ToastStatus.error, rs.data.message, () => {
+      ToastMessage.show(ToastStatus.success, rs.data.message, () => {
         fecthDataProfiles(page);
         setIdProfile("");
       });
