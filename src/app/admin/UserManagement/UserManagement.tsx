@@ -28,6 +28,7 @@ import {
   ToastMessage,
   ToastStatus,
 } from "@/layout/component/constances/toast-dialog";
+import { BuildParams } from "@/utils/BuildParams";
 const column = [
   { label: "", accesstor: "", type: ETableColumnType.CHECKBOX_ACTION },
   {
@@ -125,6 +126,7 @@ function UserManagement() {
               id_khoa: name_department,
             };
           });
+          setUserDataCoppy(newDatas);
           setDataUsers({
             ...res.data,
             datas: newDatas,
@@ -247,29 +249,47 @@ function UserManagement() {
   const handleShowDialogDel = () => {
     setOpenDialogConfirm(true);
   };
-  const handleDebouncedSearch = debounce((value: string,fieldName: any[], threshold: number) => {
-    if (value) {
-      if (UserDataCoppy.length > 0) {
-        const newDataUser = BuildSearch.Search(
-          fieldName,
-          UserDataCoppy,
-          value,
-          threshold
-        );
-        if (newDataUser.length > 0)
-          setDataUsers({ ...dataUsers, datas: newDataUser });
-        else setDataUsers({ ...dataUsers, datas: [] });
-      }
-    } else {
-      setDataUsers({ ...dataUsers, datas: UserDataCoppy });
-    }
-  }, 1000);
-  const handleChangeSearch = (value: any, fieldName: any[], threshold: number) => {
-    const values = value.target.value;
-    if (UserDataCoppy.length === 0) {
-      setUserDataCoppy(dataUsers.datas);
-    }
-    handleDebouncedSearch(values,fieldName, threshold);
+  // const handleDebouncedSearch = debounce((value: string,fieldName: any[], threshold: number) => {
+  //   if (value) {
+  //     if (UserDataCoppy.length > 0) {
+  //       const newDataUser = BuildSearch.Search(
+  //         fieldName,
+  //         UserDataCoppy,
+  //         value,
+  //         threshold
+  //       );
+  //       if (newDataUser.length > 0)
+  //         setDataUsers({ ...dataUsers, datas: newDataUser });
+  //       else setDataUsers({ ...dataUsers, datas: [] });
+  //     }
+  //   } else {
+  //     setDataUsers({ ...dataUsers, datas: UserDataCoppy });
+  //   }
+  // }, 1000);
+  // const handleChangeSearch = (value: any, fieldName: any[], threshold: number) => {
+  //   const values = value.target.value;
+  //   if (UserDataCoppy.length === 0) {
+  //     setUserDataCoppy(dataUsers.datas);
+  //   }
+  //   handleDebouncedSearch(values,fieldName, threshold);
+  // };
+  const handleChangeSearchSelected = (
+    value: any,
+    fieldName: any[],
+    threshold: number
+  ) => {
+    const newDatas: any = BuildSearch.handleChangeSearch(
+      value,
+      fieldName,
+      threshold,
+      UserDataCoppy
+    );
+    if (!newDatas) return setDataUsers({ ...dataUsers, datas: UserDataCoppy });
+    if (newDatas?.length > 0) {
+      const coppyData = [...UserDataCoppy];
+      const newArr = BuildParams.commonItemsOf2Arr(coppyData, newDatas);
+      setDataUsers({ ...dataUsers, datas: newArr });
+    } else setDataUsers({ ...dataUsers, datas: [] });
   };
   const handleExportExcel = () => {
     const titleColumn = [
@@ -353,7 +373,9 @@ function UserManagement() {
         onClickShowHideDialog={handleShowHideDialog}
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
-        onClickChangeInputSearch={(value) => handleChangeSearch(value,  ["hodem", "ten"], 0.5)}
+        onClickChangeInputSearch={(value) =>
+          handleChangeSearchSelected(value, ["hodem", "ten"], 0.5)
+        }
         fileInputRef={fileInputRef}
         onClickImportExcel={(e) => handleImportExcel(e)}
         onClickExportExcel={handleExportExcel}

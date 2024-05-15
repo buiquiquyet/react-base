@@ -168,42 +168,55 @@ function TeacherProfile() {
     });
     setProfileDataCoppy([]);
   };
-  const handleDebouncedSearch = debounce(
-    (value: string, fieldName: any[], threshold: number) => {
-      if (value) {
-        if (ProfileCoppy?.length > 0) {
-          const newDataUser = BuildSearch.Search(
-            fieldName,
-            ProfileCoppyToSearch,
-            value,
-            threshold
-          );
-          if (newDataUser.length > 0) {
-            const coppyData = [...ProfileCoppy];
-            const newArr = BuildParams.commonItemsOf2Arr(
-              coppyData,
-              newDataUser
-            );
-            setDataProfiles({ ...dataProfiles, datas: newArr });
-          } else setDataProfiles({ ...dataProfiles, datas: [] });
-        }
-      } else {
-        setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
-      }
-    },
-    1000
-  );
-  const handleChangeSearch = (
+  // const handleDebouncedSearch = debounce(
+  //   (value: string, fieldName: any[], threshold: number) => {
+  //     if (value) {
+  //       if (ProfileCoppy?.length > 0) {
+  //         const newDataUser = BuildSearch.Search(
+  //           fieldName,
+  //           ProfileCoppyToSearch,
+  //           value,
+  //           threshold
+  //         );
+  //         if (newDataUser.length > 0) {
+  //           const coppyData = [...ProfileCoppy];
+  //           const newArr = BuildParams.commonItemsOf2Arr(
+  //             coppyData,
+  //             newDataUser
+  //           );
+  //           setDataProfiles({ ...dataProfiles, datas: newArr });
+  //         } else setDataProfiles({ ...dataProfiles, datas: [] });
+  //       }
+  //     } else {
+  //       setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
+  //     }
+  //   },
+  //   1000
+  // );
+  // const handleChangeSearch = (
+  //   value: any,
+  //   fieldName: any[],
+  //   threshold: number
+  // ) => {
+  //   handleDebouncedSearch(value, fieldName, threshold);
+  // };
+  const handleChangeSearchSelected = (
     value: any,
     fieldName: any[],
     threshold: number
   ) => {
-    // if (ProfileCoppy?.length === 0) {
-    //   setProfileDataCoppy(dataProfiles.datas);
-    // }
-    handleDebouncedSearch(value, fieldName, threshold);
+    const newDatas: any = BuildSearch.handleChangeSearch(
+      value,
+      fieldName,
+      threshold,
+      ProfileCoppyToSearch
+    );
+    if (newDatas?.length > 0) {
+      const coppyData = [...ProfileCoppy];
+      const newArr = BuildParams.commonItemsOf2Arr(coppyData, newDatas);
+      setDataProfiles({ ...dataProfiles, datas: newArr });
+    } else setDataProfiles({ ...dataProfiles, datas: ProfileCoppy });
   };
-
   const handleChangeSemester = (value: any) => {
     setSelectedSemester(value);
   };
@@ -265,7 +278,7 @@ function TeacherProfile() {
       }
     } else ToastMessage.show(ToastStatus.error, ErrorMessage.ERR_STATUS_CHECK);
   };
-  
+
   const handleUpdateNote = async (note: string) => {
     const rsUpdateNote = await updateNoteRecord(idRecordUpdateNote, note);
     if (rsUpdateNote.data.message) {
@@ -305,7 +318,7 @@ function TeacherProfile() {
         "Trạng thái",
       ];
       const titleColumnInstructor = ["Lớp", "Đợt", "Họ tên GV", "Số file"];
-      const exportDataRecord = dataProfiles.datas.map((item) => [
+      const exportDataRecord = dataProfiles.datas.map((item: any) => [
         item.lop,
         item?.ten_hoc_phan,
         item.ky_id,
@@ -320,7 +333,7 @@ function TeacherProfile() {
           ? "Đã duyệt"
           : "Không duyệt",
       ]);
-      const exportDataInstructor = dataProfiles.datas.map((item) => [
+      const exportDataInstructor = dataProfiles.datas.map((item: any) => [
         item.lop,
         item.ky_id,
         item.ten_gv,
@@ -571,11 +584,7 @@ function TeacherProfile() {
     fecthDataFileByIdProfile(idProfile);
   }, [idProfile, location.pathname]);
   useEffect(() => {
-    if (
-      dataUserContext &&
-      optionSemester &&
-      optionSemester.length > 0 
-    ) {
+    if (dataUserContext && optionSemester && optionSemester.length > 0) {
       fecthDataProfiles(page);
     }
   }, [
@@ -663,7 +672,7 @@ function TeacherProfile() {
         onClickShowDialogDel={handleShowDialogDel}
         rowIdSelects={rowIdSelects}
         onClickChangeInputSearch={(value) =>
-          handleChangeSearch(value.target.value, ["ten_hoc_phan"], 0.5)
+          handleChangeSearchSelected(value.target.value, ["ten_hoc_phan"], 0.5)
         }
         fileInputRef={fileInputRef}
         disabledElement={initialArrDisabled}
@@ -675,10 +684,10 @@ function TeacherProfile() {
         optionClass={optionClasses}
         onChangeSelectedDepartmentOption={handleFetchSubjectByDepartmentId}
         onChangeSelectedSubjectOption={(value) =>
-          handleChangeSearch(value, ["bo_mon_id"], 0)
+          handleChangeSearchSelected(value, ["bo_mon_id"], 0)
         }
         onChangeSelectedClassOption={(value) =>
-          handleChangeSearch(value, ["lop"], 0)
+          handleChangeSearchSelected(value, ["lop"], 0)
         }
       />
       {columnTable?.length > 0 && (
