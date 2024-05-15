@@ -30,7 +30,7 @@ import { ToastContainer } from "react-toastify";
 import DialogTeahcerProfileManagerment from "./DialogTeacherProfile";
 import "./../styles/TeacherProfile.scss";
 import { getAllSemesters } from "@/redux/api/teacher/SemesterCrud";
-import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
+import { itemOptions, keyItem } from "@/layout/component/constances/itemOptionSetting";
 import {
   deleteFileByProfileIds,
   getCountByProfileId,
@@ -156,7 +156,7 @@ function TeacherProfile() {
     if (id) {
       setIdProfile(id);
     }
-    if (key.key === "2") {
+    if (key.key === keyItem.DELETE) {
       setOpenDialogConfirm(true);
     } else {
       setIsShowDialog(!isShowDialog);

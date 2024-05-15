@@ -21,7 +21,7 @@ import { BuildSearch } from "@/utils/BuildSearch";
 import { BuildExcel } from "@/utils/BuildExcel";
 import BaseHeaderTable from "@/layout/component/base-header-table/BaseHeaderTable";
 import { ApiResponse } from "@/layout/component/constances/api-response";
-import { itemOptions } from "@/layout/component/constances/itemOptionSetting";
+import { itemOptions, keyItem } from "@/layout/component/constances/itemOptionSetting";
 import { EDisabledHeaderTableCom } from "@/layout/component/constances/disabledHeaderTable";
 import { ErrorMessage } from "@/layout/component/constances/error-code.const";
 import {
@@ -240,7 +240,7 @@ function UserManagement() {
     if (id) {
       setIdUser(id);
     }
-    if (key.key === "2") {
+    if (key.key === keyItem.DELETE) {
       setOpenDialogConfirm(true);
     } else {
       setIsShowDialog(!isShowDialog);
