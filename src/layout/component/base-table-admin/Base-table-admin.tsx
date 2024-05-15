@@ -14,6 +14,7 @@ import { ETableColumnType } from "../constances/table.const";
 import { memo } from "react";
 import "./../styles/BaseTable.scss";
 import BaseOptionSettings from "../base-option-setting/BaseOptionSettings";
+import { NumberApprove, TypeApprove } from "../constances/aprove.const";
 
 interface PropsTable {
   columns: any[];
@@ -174,20 +175,22 @@ const BaseTableAdmin: React.FC<PropsTable> = ({
                             style={{
                               minWidth: "120px",
                               background:
-                                row[column.accessor] === "0" ||
+                                row[column.accessor] ===
+                                  NumberApprove.PENDING ||
                                 row[column.accessor] === ""
                                   ? "#94b8b8"
-                                  : row[column.accessor] === "1"
+                                  : row[column.accessor] ===
+                                    NumberApprove.APPROVED
                                   ? "#33ff33"
                                   : "red",
                             }}
                           >
-                            {row[column.accessor] === "0" ||
+                            {row[column.accessor] === NumberApprove.PENDING ||
                             row[column.accessor] === ""
-                              ? "Chờ duyệt"
-                              : row[column.accessor] === "1"
-                              ? "Đã duyệt"
-                              : "Không duyệt"}
+                              ? TypeApprove.PENDING
+                              : row[column.accessor] === NumberApprove.APPROVED
+                              ? TypeApprove.APPROVED
+                              : TypeApprove.NOT_APPROVED}
                           </div>
                         </div>
                       ) : (
