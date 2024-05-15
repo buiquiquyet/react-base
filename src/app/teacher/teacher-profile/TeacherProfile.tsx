@@ -54,6 +54,7 @@ import {
   ToastMessage,
   ToastStatus,
 } from "@/layout/component/constances/toast-dialog";
+import { NumberApprove, TypeApprove } from "@/layout/component/constances/aprove.const";
 
 const columnRecord: any = [
   { label: "", accessor: "", type: ETableColumnType.CHECKBOX_ACTION },
@@ -327,11 +328,11 @@ function TeacherProfile() {
         item?.ngay_ket_thuc,
         item.countFile,
         item?.ghichu,
-        item?.check === "0"
-          ? "Chờ duyệt"
-          : item.check === "1"
-          ? "Đã duyệt"
-          : "Không duyệt",
+        item?.check === NumberApprove.PENDING
+          ? TypeApprove.PENDING
+          : item.check === NumberApprove.APPROVED
+          ? TypeApprove.APPROVED
+          : TypeApprove.NOT_APPROVED
       ]);
       const exportDataInstructor = dataProfiles.datas.map((item: any) => [
         item.lop,

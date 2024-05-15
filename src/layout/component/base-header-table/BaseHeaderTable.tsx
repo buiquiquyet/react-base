@@ -1,6 +1,7 @@
 import BaseButton from "../base-button/BaseButton";
 import BaseSearch from "../base-search/BaseSearch";
 import BaseSelect from "../base-select/BaseSelect";
+import { NumberApprove, TypeApprove } from "../constances/aprove.const";
 // import BaseSelect from "../base-select/BaseSelect";
 import { ButtonColor } from "../constances/button.const";
 import { EDisabledHeaderTableCom } from "../constances/disabledHeaderTable";
@@ -25,9 +26,9 @@ interface Props {
   disabledElement?: EDisabledHeaderTableCom[];
 }
 const optionChecks = [
-  { value: "0", label: "Chờ duyệt" },
-  { value: "1", label: "Đã duyệt" },
-  { value: "2", label: "Không duyệt" },
+  { value: NumberApprove.PENDING, label: TypeApprove.PENDING },
+  { value: NumberApprove.APPROVED, label: TypeApprove.APPROVED },
+  { value: NumberApprove.NOT_APPROVED, label: TypeApprove.NOT_APPROVED },
 ];
 const BaseHeaderTable: React.FC<Props> = ({
   onClickShowHideDialog,
