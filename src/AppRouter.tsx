@@ -5,7 +5,7 @@ import {
   // useLocation,
   useNavigate,
 } from "react-router-dom";
-import Login from "@/app/auth/Login";
+import Login from "@/app/auth/login";
 import { Suspense, createContext, lazy, useEffect, useState } from "react";
 import { validateUser } from "./redux/api/admin/userCrud";
 import { BuildParams } from "./utils/BuildParams";
